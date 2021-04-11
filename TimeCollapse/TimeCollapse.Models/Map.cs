@@ -6,11 +6,11 @@ namespace TimeCollapse.Models
 {
     public class Map
     {
-        public readonly HashSet<Rectangle> Blocks;
+        public readonly HashSet<RectangleF> Blocks;
 
         public Map(IEnumerable<Rectangle> blocks)
         {
-            Blocks = blocks.ToHashSet();
+            Blocks = blocks.Select(r => new RectangleF(r.Location, r.Size)).ToHashSet();
         }
     }
 }

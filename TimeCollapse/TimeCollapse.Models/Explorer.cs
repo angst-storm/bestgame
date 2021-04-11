@@ -10,7 +10,7 @@ namespace TimeCollapse.Models
         private readonly Queue<(Action, int)> _actionsSequence = new ();
         private (Action, int) _nextAction;
 
-        public Explorer(Point startLocation, Size colliderSize) : base(startLocation, colliderSize)
+        public Explorer(Point startLocation, Size colliderSize, float mass, float dt) : base(startLocation, colliderSize, mass, dt)
         {
         }
 
@@ -18,7 +18,7 @@ namespace TimeCollapse.Models
         {
             if (!_fromPast)
             {
-                _actionsSequence.Enqueue((UpdateLocation, tick));
+                _actionsSequence.Enqueue((() => UpdateLocation(VectorF.Zero), tick));
             }
             else
             {
