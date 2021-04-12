@@ -1,15 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 
 namespace TimeCollapse.Models
 {
     public class MovingObject
     {
-        private static Vector2 _gravity = new(0, 10);
+        private static int _gravity = 10;
         private readonly Size _colliderSize;
-        private Vector2 _fallVelocity;
+        private int _verticalSpeed;
         public Point Location;
 
         public MovingObject(Point startLocation, Size colliderSize)
@@ -33,8 +32,8 @@ namespace TimeCollapse.Models
             get
             {
                 var collider = Collider;
-                return Game.ActualMap.Blocks.Any(r => TouchesLine(r, new Point(collider.Left, collider.Height),
-                    new Point(Collider.Right, collider.Height)));
+                return Game.ActualMap.Blocks.Any(r => TouchesLine(r, new Point(collider.Left, collider.Top),
+                    new Point(Collider.Right, collider.Top)));
             }
         }
 
@@ -44,10 +43,10 @@ namespace TimeCollapse.Models
         {
             var collider = Collider;
             return Game.ActualMap.Blocks.Any(r =>
-                TouchesLine(r, new Point(x, collider.Height), new Point(x, collider.Bottom)));
+                TouchesLine(r, new Point(x, collider.Top), new Point(x, collider.Bottom)));
         }
 
-        public void UpdateLocation(Vector2 run, Vector2 jump)
+        public void UpdateLocation(int xMove, int yMove)
         {
             //игрок двигается на run или насколько возможно в сторону run
             //если jump не равен нулю, то скорость падения игрока равна jump, иначе, если он не на полу, скорость падения игрока равна скорость падения + гравитация

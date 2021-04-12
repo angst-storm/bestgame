@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Numerics;
 
 namespace TimeCollapse.Models
 {
     public class Explorer : MovingObject
     {
         private readonly Queue<(Action, int)> _actionsSequence = new();
-        private readonly Vector2 _jumpVector;
-        private readonly Vector2 _leftRunVector;
-        private readonly Vector2 _rightRunVector;
+        private readonly int _jumpHeight;
+        private readonly int _leftRunSpeed;
+        private readonly int _rightRunSpeed;
         private bool _fromPast;
         private (Action, int) _nextAction;
         public bool Jump = false;
@@ -20,18 +19,18 @@ namespace TimeCollapse.Models
         public Explorer(Point startLocation, Size colliderSize, int runSpeed, int jumpHeight) : base(startLocation,
             colliderSize)
         {
-            _jumpVector = new Vector2(0, -jumpHeight);
-            _leftRunVector = new Vector2(-runSpeed, 0);
-            _rightRunVector = new Vector2(runSpeed, 0);
+            _jumpHeight = -jumpHeight;
+            _leftRunSpeed = -runSpeed;
+            _rightRunSpeed = runSpeed;
         }
 
         public void Move(int tick)
         {
             if (!_fromPast)
             {
-                var jump = Jump && OnFloor ? _jumpVector : Vector2.Zero;
-                var run = (RightRun ? _rightRunVector : Vector2.Zero) + (LeftRun ? _leftRunVector : Vector2.Zero);
-                _actionsSequence.Enqueue((() => UpdateLocation(jump, run), tick));
+                var jump = Jump && OnFloor ? _jumpHeight : 0;
+                var run = (RightRun ? _rightRunSpeed : 0) + (LeftRun ? _leftRunSpeed : 0);
+                _actionsSequence.Enqueue((() => UpdateLocation(run, jump), tick));
                 UpdateLocation(run, jump);
             }
             else
