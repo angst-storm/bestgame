@@ -14,7 +14,7 @@ namespace TimeCollapse.Models
 
         public override void Move(int tick)
         {
-            var move = (Jump ? new Vector(0, -8) : Vector.Zero) +
+            var move = (Jump && OnFloor? new Vector(0, -20) : Vector.Zero) +
                        (RightRun ? new Vector(4, 0) : Vector.Zero) +
                        (LeftRun ? new Vector(-4, 0) : Vector.Zero);
             Translate(move);
