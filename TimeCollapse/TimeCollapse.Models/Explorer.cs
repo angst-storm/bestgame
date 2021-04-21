@@ -1,52 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 
 namespace TimeCollapse.Models
 {
-    public class Explorer : MovingObject
+    public class Explorer : Character
     {
-        private readonly Queue<(Action, int)> _actionsSequence = new();
-        private readonly int _jumpHeight;
-        private readonly int _leftRunSpeed;
-        private readonly int _rightRunSpeed;
-        private bool _fromPast;
-        private (Action, int) _nextAction;
-        public bool Jump = false;
-        public bool LeftRun = false;
-        public bool RightRun = false;
-
-        public Explorer(Point startLocation, Size colliderSize, int runSpeed, int jumpHeight) : base(startLocation,
-            colliderSize)
+        public Explorer(Game game, Point startLocation, Size colliderSize) : base(game, startLocation, colliderSize)
         {
-            _jumpHeight = -jumpHeight;
-            _leftRunSpeed = -runSpeed;
-            _rightRunSpeed = runSpeed;
         }
 
-        public void Move(int tick)
-        {
-            if (!_fromPast)
-            {
-                var jump = Jump && OnFloor ? _jumpHeight : 0;
-                var run = (RightRun ? _rightRunSpeed : 0) + (LeftRun ? _leftRunSpeed : 0);
-                _actionsSequence.Enqueue((() => UpdateLocation(run, jump), tick));
-                UpdateLocation(run, jump);
-            }
-            else
-            {
-                if (tick == _nextAction.Item2)
-                {
-                    _nextAction.Item1();
-                    _nextAction = _actionsSequence.Dequeue();
-                }
-            }
-        }
+        public bool Jump { get; set; }
+        public bool RightRun { get; set; }
+        public bool LeftRun { get; set; }
 
-        public void ToCopy()
+        public override void Move(int tick)
         {
-            _fromPast = true;
-            _nextAction = _actionsSequence.Dequeue();
+            var move = (Jump ? new Vector(0, -8) : Vector.Zero) +
+                       (RightRun ? new Vector(4, 0) : Vector.Zero) +
+                       (LeftRun ? new Vector(-4, 0) : Vector.Zero);
+            Translate(move);
         }
     }
 }

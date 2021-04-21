@@ -1,21 +1,24 @@
 ﻿using System.Collections.Generic;
-using System.Data;
+using System.Drawing;
 
 namespace TimeCollapse.Models
 {
-    public static class Game
+    public class Game
     {
-        public static Map ActualMap;
-        public static readonly List<Map> Maps;
-        public static Explorer PresentExplorer;
-        public static List<Explorer> Explorers;
+        public Map ActualMap { get; }
+        public List<Map> Maps { get; }
+        public Explorer PresentExplorer { get; }
 
-        public static void Update(int tick)
+        public Game()
         {
-            foreach (var explorer in Explorers)
-            {
-                explorer.Move(tick);
-            }
+            Maps = new List<Map> {Map.TestMap};
+            ActualMap = Maps[0];
+            PresentExplorer = new Explorer(this, ActualMap.PlayerStartPosition, new Size(10, 20));
+        }
+
+        public void Update(int tick)
+        {
+            PresentExplorer.Move(tick);
         }
     }
 }
