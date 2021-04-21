@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace TimeCollapse.Models.Tests
 {
-    public class TranslateTest
+    public class CharacterTests
     {
         private static Game GameForTest(Point startPosition)
         {
@@ -72,6 +72,16 @@ namespace TimeCollapse.Models.Tests
             var startPosition = game.PresentExplorer.Location;
             game.PresentExplorer.Translate(new Vector(0, 10));
             Assert.AreEqual(game.PresentExplorer.Location, startPosition);
+        }
+
+        [Test]
+        public void OnFloorTest()
+        {
+            var game = GameForTest(new Point(9, 14));
+            game.PresentExplorer.Translate(new Vector(0,0));
+            Assert.AreEqual(true, game.PresentExplorer.OnFloor);
+            game.PresentExplorer.Translate(new Vector(0, -1));
+            Assert.AreEqual(false, game.PresentExplorer.OnFloor);
         }
     }
 }
