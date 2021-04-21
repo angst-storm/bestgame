@@ -4,7 +4,7 @@ namespace TimeCollapse.Models
 {
     public class Explorer : Character
     {
-        public Explorer(Game game, Point startLocation, Size colliderSize) : base(game, startLocation, colliderSize)
+        public Explorer(Game game, Point startLocation, Size colliderSize, bool gravityEffect) : base(game, startLocation, colliderSize, gravityEffect)
         {
         }
 
