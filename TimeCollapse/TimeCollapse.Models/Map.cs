@@ -6,7 +6,7 @@ namespace TimeCollapse.Models
 {
     public class Map
     {
-        public readonly HashSet<Rectangle> Blocks;
+        public HashSet<Rectangle> Blocks { get; }
         public Point PlayerStartPosition { get; }
 
         public Map(IEnumerable<Rectangle> blocks, Point playerStartPosition)
