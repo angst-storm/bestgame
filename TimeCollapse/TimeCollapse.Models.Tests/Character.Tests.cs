@@ -6,7 +6,7 @@ namespace TimeCollapse.Models.Tests
 {
     public class CharacterTests
     {
-        public static readonly Map CollisionTestMap1 = new(new[]
+        private static readonly Map CollisionTestMap1 = new(new[]
         {
             new Rectangle(2, 1, 4, 1),
             new Rectangle(1, 2, 1, 4),
@@ -14,11 +14,14 @@ namespace TimeCollapse.Models.Tests
             new Rectangle(2, 6, 4, 1)
         }, new[] {(new Point(3, 4), new Point(7, 7))});
 
-        public static Map CollisionTestMap2(int wallWidth) => new Map(new[]
+        private static Map CollisionTestMap2(int wallWidth)
         {
-            new Rectangle(1, 6, 5, 16),
-            new Rectangle(6, 1, wallWidth, 5)
-        }, new[] {(new Point(4, 4), new Point())});
+            return new(new[]
+            {
+                new Rectangle(1, 6, 5, 16),
+                new Rectangle(6, 1, wallWidth, 5)
+            }, new[] {(new Point(4, 4), new Point())});
+        }
 
         [TestCase(0, 0, 3, 4)]
         [TestCase(-1, 0, 2, 4)]
@@ -56,7 +59,7 @@ namespace TimeCollapse.Models.Tests
         public void OnFloorTest()
         {
             var game = new Game(new List<Map> {CollisionTestMap2(0)}, new Size(2, 2));
-            game.PresentExplorer.Translate(new Vector(0,0));
+            game.PresentExplorer.Translate(new Vector(0, 0));
             Assert.AreEqual(true, game.PresentExplorer.OnFloor);
             game.PresentExplorer.Translate(new Vector(0, -2));
             Assert.AreEqual(false, game.PresentExplorer.OnFloor);
