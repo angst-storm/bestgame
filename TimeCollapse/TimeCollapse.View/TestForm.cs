@@ -14,7 +14,7 @@ namespace TimeCollapse.View
 
         public TestForm()
         {
-            game = new Game();
+            game = Game.TestGame;
             updateTimer = new Timer {Interval = 10};
             updateTimer.Tick += UpdateTimerTick;
             InitializeComponent();
@@ -28,9 +28,14 @@ namespace TimeCollapse.View
         private void TestForm_Paint(object sender, PaintEventArgs e)
         {
             var g = e.Graphics;
+            //g.FillRectangle(new SolidBrush(game.PreviousAttemptWin? Color.PaleGreen : Color.PaleVioletRed), ClientRectangle);
             var blockBrush = new SolidBrush(Color.Black);
             var explorerPen = new Pen(Color.Brown, 2);
+            var targetPen = new SolidBrush(Color.Green);
             g.FillRectangles(blockBrush, game.ActualMap.Blocks.ToArray());
+            if (game.ExplorersFromPast.Count != 0)
+                g.DrawRectangles(explorerPen, game.ExplorersFromPast.Select(explorer => explorer.Collider).ToArray());
+            g.FillRectangle(targetPen, game.ActualMap.ActualTarget);
             g.DrawRectangle(explorerPen, game.PresentExplorer.Collider);
         }
 

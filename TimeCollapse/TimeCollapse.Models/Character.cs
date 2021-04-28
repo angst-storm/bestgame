@@ -5,19 +5,15 @@ namespace TimeCollapse.Models
 {
     public abstract class Character
     {
-        private static readonly Vector Gravity = new(0, 1);
-        private static readonly double maxSpeed = 10;
-        private static readonly double dt = 1;
+        private static readonly double maxSpeed = 15;
         private readonly Game game;
         private Vector speed;
-        private readonly bool gravityEffect;
 
-        public Character(Game game, Point startLocation, Size colliderSize, bool gravityEffect)
+        public Character(Game game, Point startLocation, Size colliderSize)
         {
             this.game = game;
             Collider = new Rectangle(startLocation, colliderSize);
             speed = Vector.Zero;
-            this.gravityEffect = gravityEffect;
         }
 
         public Rectangle Collider { get; private set; }
@@ -28,9 +24,9 @@ namespace TimeCollapse.Models
 
         public void Translate(Vector force)
         {
-            speed = new Vector(force.X * dt, speed.Y + (force.Y + Gravity.Y * (gravityEffect ? 1 : 0)) * dt);
+            speed = new Vector(force.X, speed.Y + (force.Y + 1));
             if (speed.Length > maxSpeed) speed = speed.Normalize() * maxSpeed;
-            var offset = new Vector(Location) + speed * dt;
+            var offset = new Vector(Location) + speed;
             var offsetCollider = new Rectangle(offset.ToPoint(), Collider.Size);
             foreach (var block in game.ActualMap.Blocks.Where(offsetCollider.IntersectsWith))
             {
@@ -65,6 +61,12 @@ namespace TimeCollapse.Models
                                                          (Collider.Left >= block.Left && Collider.Left <= block.Right ||
                                                           Collider.Right >= block.Left &&
                                                           Collider.Right <= block.Right));
+        }
+
+        public void Teleport(Point spawn)
+        {
+            speed = Vector.Zero;
+            Collider = new Rectangle(spawn, Collider.Size);
         }
 
         public abstract void Move(int tick);

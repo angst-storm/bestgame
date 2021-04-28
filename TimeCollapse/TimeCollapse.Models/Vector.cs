@@ -5,7 +5,7 @@ namespace TimeCollapse.Models
 {
     public class Vector
     {
-        public static Vector Zero = new(0, 0);
+        public static readonly Vector Zero = new(0, 0);
 
         public readonly double X;
         public readonly double Y;
@@ -39,7 +39,7 @@ namespace TimeCollapse.Models
             return $"X: {X}, Y: {Y}";
         }
 
-        protected bool Equals(Vector other)
+        private bool Equals(Vector other)
         {
             return DoubleEquals(X, other.X) && DoubleEquals(Y, other.Y);
         }

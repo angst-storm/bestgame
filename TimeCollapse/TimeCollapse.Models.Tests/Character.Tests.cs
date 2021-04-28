@@ -6,6 +6,7 @@ namespace TimeCollapse.Models.Tests
 {
     public class CharacterTests
     {
+/*
         private static Game GameForTest(Point startPosition)
         {
             var blockSize = new Size(3, 3);
@@ -83,5 +84,6 @@ namespace TimeCollapse.Models.Tests
             game.PresentExplorer.Translate(new Vector(0, -1));
             Assert.AreEqual(false, game.PresentExplorer.OnFloor);
         }
+*/
     }
 }

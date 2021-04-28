@@ -1,11 +1,18 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 
 namespace TimeCollapse.Models
 {
     public class Explorer : Character
     {
-        public Explorer(Game game, Point startLocation, Size colliderSize, bool gravityEffect) : base(game, startLocation, colliderSize, gravityEffect)
+        private readonly Point startLocation;
+        private readonly Queue<Vector> translates = new();
+
+        private bool present = true;
+
+        public Explorer(Game game, Point startLocation, Size colliderSize) : base(game, startLocation, colliderSize)
         {
+            this.startLocation = startLocation;
         }
 
         public bool Jump { get; set; }
@@ -14,10 +21,22 @@ namespace TimeCollapse.Models
 
         public override void Move(int tick)
         {
-            var move = (Jump && OnFloor? new Vector(0, -20) : Vector.Zero) +
-                       (RightRun ? new Vector(4, 0) : Vector.Zero) +
-                       (LeftRun ? new Vector(-4, 0) : Vector.Zero);
+            Vector move;
+            if (present)
+                move = (Jump && OnFloor ? new Vector(0, -15) : Vector.Zero) +
+                       (RightRun ? new Vector(5, 0) : Vector.Zero) +
+                       (LeftRun ? new Vector(-5, 0) : Vector.Zero);
+            else
+                move = translates.Dequeue();
+
+            translates.Enqueue(move);
             Translate(move);
+        }
+
+        public void ToPast()
+        {
+            Teleport(startLocation);
+            present = false;
         }
     }
 }

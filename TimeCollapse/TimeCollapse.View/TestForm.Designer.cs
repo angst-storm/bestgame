@@ -33,7 +33,7 @@ namespace TimeCollapse.View
             // 
             // TestForm
             // 
-            this.ClientSize = new System.Drawing.Size(782, 553);
+            this.ClientSize = new System.Drawing.Size(1024, 768);
             this.Name = "TestForm";
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.TestForm_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TestForm_KeyDown);
