@@ -6,84 +6,60 @@ namespace TimeCollapse.Models.Tests
 {
     public class CharacterTests
     {
-/*
-        private static Game GameForTest(Point startPosition)
+        public static readonly Map CollisionTestMap1 = new(new[]
         {
-            var blockSize = new Size(3, 3);
+            new Rectangle(2, 1, 4, 1),
+            new Rectangle(1, 2, 1, 4),
+            new Rectangle(6, 2, 1, 4),
+            new Rectangle(2, 6, 4, 1)
+        }, new[] {(new Point(3, 4), new Point(7, 7))});
 
-            var collisionTestMap = new Map(new[]
-            {
-                new Rectangle(new Point(1, 1), blockSize),
-                new Rectangle(new Point(1, 9), blockSize),
-                new Rectangle(new Point(1, 17), blockSize),
-                new Rectangle(new Point(9, 1), blockSize),
-                new Rectangle(new Point(17, 1), blockSize),
-                new Rectangle(new Point(17, 9), blockSize),
-                new Rectangle(new Point(17, 17), blockSize),
-                new Rectangle(new Point(9, 17), blockSize)
-            }, startPosition);
+        public static Map CollisionTestMap2(int wallWidth) => new Map(new[]
+        {
+            new Rectangle(1, 6, 5, 16),
+            new Rectangle(6, 1, wallWidth, 5)
+        }, new[] {(new Point(4, 4), new Point())});
 
-            var maxSpeedTestMap = new Map(new[]
-            {
-                new Rectangle(new Point(1, 4), new Size(12, 12))
-            }, new Point(1, 1));
-
-            return new Game(new List<Map> {collisionTestMap, maxSpeedTestMap}, new Size(3, 3), false);
+        [TestCase(0, 0, 3, 4)]
+        [TestCase(-1, 0, 2, 4)]
+        [TestCase(-2, 0, 2, 4)]
+        [TestCase(1, 0, 4, 4)]
+        [TestCase(2, 0, 4, 4)]
+        [TestCase(0, 1, 3, 4)]
+        [TestCase(0, -1, 3, 4)]
+        [TestCase(0, -2, 3, 3)]
+        [TestCase(0, -3, 3, 2)]
+        [TestCase(-1, -3, 2, 2)]
+        [TestCase(-2, -4, 2, 2)]
+        [TestCase(1, -3, 4, 2)]
+        [TestCase(2, -4, 4, 2)]
+        public void RoomCollisionTest(int offsetX, int offsetY, int expectedX, int expectedY)
+        {
+            var game = new Game(new List<Map> {CollisionTestMap1}, new Size(2, 2));
+            game.PresentExplorer.Translate(new Vector(offsetX, offsetY));
+            Assert.AreEqual(new Point(expectedX, expectedY), game.PresentExplorer.Location);
         }
 
-        [TestCase(0, 3, 0, 3)]
-        [TestCase(0, 7, 0, 5)]
-        [TestCase(0, -7, 0, -5)]
-        [TestCase(7, 0, 5, 0)]
-        [TestCase(-7, 0, -5, 0)]
-        [TestCase(7, 7, 5, 5)]
-        [TestCase(-7, -7, -5, -5)]
-        [TestCase(-7, 7, -5, 5)]
-        [TestCase(7, -7, 5, -5)]
-        public void StraightPathTranslateTest(int xOffSet, int yOffSet, int expectedXOffSet, int expectedYOffSet)
+        [TestCase(1, 1, 4, 4)]
+        [TestCase(3, 1, 7, 5)]
+        [TestCase(1, 16, 4, 4)]
+        [TestCase(16, 16, 4, 5)]
+        [TestCase(20, 16, 4, 5)]
+        public void ThroughTheBlocksTest(int speed, int wallWidth, int expectedX, int expectedY)
         {
-            var game = GameForTest(new Point(9, 9));
-            var startPosition = game.PresentExplorer.Location;
-            game.PresentExplorer.Translate(new Vector(xOffSet, yOffSet));
-            Assert.AreEqual(new Point(startPosition.X + expectedXOffSet, startPosition.Y + expectedYOffSet),
-                game.PresentExplorer.Location);
-        }
-
-        [TestCase(5, 2, -3, 0, -1, 0)]
-        [TestCase(5, 2, 3, 0, 1, 0)]
-        [TestCase(2, 5, 0, -3, 0, -1)]
-        [TestCase(2, 5, 0, 3, 0, 1)]
-        [TestCase(5, 8, -3, 0, -1, 0)]
-        [TestCase(13, 8, 3, 0, 1, 0)]
-        public void AngleApproachTranslateTest(int startX, int startY, int xOffSet, int yOffSet,
-            int expectedXOffSet, int expectedYOffSet)
-        {
-            var game = GameForTest(new Point(startX, startY));
-            var startPosition = game.PresentExplorer.Location;
-            game.PresentExplorer.Translate(new Vector(xOffSet, yOffSet));
-            Assert.AreEqual(new Point(startPosition.X + expectedXOffSet, startPosition.Y + expectedYOffSet),
-                game.PresentExplorer.Location);
-        }
-
-        [Test]
-        public void ThroughTheBlocksTest()
-        {
-            var game = GameForTest(new Point(9, 9));
-            game.SwitchMap(1);
-            var startPosition = game.PresentExplorer.Location;
-            game.PresentExplorer.Translate(new Vector(0, 10));
-            Assert.AreEqual(game.PresentExplorer.Location, startPosition);
+            var game = new Game(new List<Map> {CollisionTestMap2(wallWidth)}, new Size(2, 2));
+            game.PresentExplorer.Translate(new Vector(speed, 0));
+            Assert.AreEqual(new Point(expectedX, expectedY), game.PresentExplorer.Location);
         }
 
         [Test]
         public void OnFloorTest()
         {
-            var game = GameForTest(new Point(9, 14));
+            var game = new Game(new List<Map> {CollisionTestMap2(0)}, new Size(2, 2));
             game.PresentExplorer.Translate(new Vector(0,0));
             Assert.AreEqual(true, game.PresentExplorer.OnFloor);
-            game.PresentExplorer.Translate(new Vector(0, -1));
+            game.PresentExplorer.Translate(new Vector(0, -2));
             Assert.AreEqual(false, game.PresentExplorer.OnFloor);
         }
-*/
     }
 }

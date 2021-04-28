@@ -5,7 +5,7 @@ namespace TimeCollapse.Models
 {
     public abstract class Character
     {
-        private static readonly double maxSpeed = 15;
+        private static readonly double maxSpeed = 16;
         private readonly Game game;
         private Vector speed;
 

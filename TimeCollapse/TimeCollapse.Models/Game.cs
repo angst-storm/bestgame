@@ -8,7 +8,7 @@ namespace TimeCollapse.Models
     public class Game
     {
         public static readonly Game TestGame = new(new List<Map> {Map.TestMap}, new Size(16, 32));
-        private Explorer DefaultExplorer() => new Explorer(this, ActualMap.ActualSpawn, new Size(16, 32));
+        private Explorer DefaultExplorer() => new Explorer(this, ActualMap.ActualSpawn, PresentExplorer.Collider.Size);
 
         public Game(List<Map> maps, Size explorerColliderSize)
         {
