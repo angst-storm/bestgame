@@ -7,13 +7,8 @@ namespace TimeCollapse.Models
 {
     public class Game
     {
-        public Map ActualMap { get; private set; }
-        public List<Map> Maps { get; }
-        public Explorer PresentExplorer { get; private set; }
-        public List<Explorer> ExplorersFromPast { get; }
-        public bool PreviousAttemptWin { get; private set; }
-
-        public static readonly Game TestGame = new(new List<Map>{Map.TestMap}, new Size(16,32));
+        public static readonly Game TestGame = new(new List<Map> {Map.TestMap}, new Size(16, 32));
+        private Explorer DefaultExplorer() => new Explorer(this, ActualMap.ActualSpawn, new Size(16, 32));
 
         public Game(List<Map> maps, Size explorerColliderSize)
         {
@@ -25,6 +20,12 @@ namespace TimeCollapse.Models
             PreviousAttemptWin = false;
         }
 
+        public Map ActualMap { get; }
+        public List<Map> Maps { get; }
+        public Explorer PresentExplorer { get; private set; }
+        public List<Explorer> ExplorersFromPast { get; }
+        public bool PreviousAttemptWin { get; private set; }
+
         private void PortalControl()
         {
             if (PresentExplorer.Collider.IntersectsWith(ActualMap.ActualTarget))
@@ -34,13 +35,13 @@ namespace TimeCollapse.Models
                     ExplorersFromPast.Add(PresentExplorer);
                     foreach (var explorer in ExplorersFromPast)
                         explorer.ToPast();
-                    PresentExplorer = new Explorer(this, ActualMap.ActualSpawn, new Size(16, 32));
+                    PresentExplorer = DefaultExplorer();
                 }
                 else
                 {
                     ActualMap.ResetStages();
                     ExplorersFromPast.Clear();
-                    PresentExplorer = new Explorer(this, ActualMap.ActualSpawn, new Size(16, 32));
+                    PresentExplorer = DefaultExplorer();
                     PreviousAttemptWin = true;
                 }
             }
@@ -49,7 +50,7 @@ namespace TimeCollapse.Models
             {
                 ActualMap.ResetStages();
                 ExplorersFromPast.Clear();
-                PresentExplorer = new Explorer(this, ActualMap.ActualSpawn, new Size(16, 32));
+                PresentExplorer = DefaultExplorer();
                 PreviousAttemptWin = false;
             }
         }
