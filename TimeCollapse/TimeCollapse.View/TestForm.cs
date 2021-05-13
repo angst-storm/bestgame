@@ -32,10 +32,8 @@ namespace TimeCollapse.View
             var explorerPen = new Pen(Color.Brown, 2);
             var targetPen = new SolidBrush(Color.Green);
             g.FillRectangles(blockBrush, game.ActualMap.Blocks.ToArray());
-            if (game.ExplorersFromPast.Count != 0)
-                g.DrawRectangles(explorerPen, game.ExplorersFromPast.Select(explorer => explorer.Collider).ToArray());
+            g.DrawRectangles(explorerPen, game.AllExplorers.Select(explorer => explorer.Collider).ToArray());
             g.FillRectangle(targetPen, game.ActualMap.ActualStage.Target);
-            g.DrawRectangle(explorerPen, game.PresentExplorer.Collider);
         }
 
         private void UpdateTimerTick(object sender, EventArgs e)

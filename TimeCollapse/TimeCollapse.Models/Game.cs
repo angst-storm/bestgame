@@ -7,9 +7,8 @@ namespace TimeCollapse.Models
     public class Game
     {
         public static readonly Game TestGame = new(new List<Map> {Map.TestMap});
-
         private readonly List<Explorer> removedExplorers = new();
-        private int tickDiff = 0;
+        private int tickDiff;
 
         private Game(List<Map> maps)
         {
@@ -25,6 +24,9 @@ namespace TimeCollapse.Models
         public Explorer PresentExplorer { get; private set; }
         public List<Explorer> ExplorersFromPast { get; }
 
+        public List<Explorer> AllExplorers =>
+            ExplorersFromPast.Except(removedExplorers).Concat(new[] {PresentExplorer}).ToList();
+
         private void PortalControl(int tick)
         {
             if (PresentExplorer.Collider.IntersectsWith(PresentExplorer.Target))
@@ -32,6 +34,7 @@ namespace TimeCollapse.Models
                 if (ActualMap.TrySwitchStage())
                 {
                     ExplorersFromPast.Add(PresentExplorer);
+                    removedExplorers.Clear();
                     foreach (var explorer in ExplorersFromPast)
                         explorer.Repeat();
                     PresentExplorer = new Explorer(this, ActualMap.ActualStage);
@@ -40,16 +43,13 @@ namespace TimeCollapse.Models
                 {
                     ActualMap.ResetStages();
                     ExplorersFromPast.Clear();
+                    removedExplorers.Clear();
                     PresentExplorer = new Explorer(this, ActualMap.ActualStage);
                 }
             }
 
-            if (ExplorersFromPast.Any(e => e.Collider.IntersectsWith(e.Target)))
-            {
-                ActualMap.ResetStages();
-                ExplorersFromPast.Clear();
-                PresentExplorer = new Explorer(this, ActualMap.ActualStage);
-            }
+            foreach (var explorer in ExplorersFromPast.Where(e => e.Collider.IntersectsWith(e.Target)))
+                removedExplorers.Add(explorer);
 
             tickDiff = tick + 1;
         }
@@ -57,7 +57,7 @@ namespace TimeCollapse.Models
         public void Update(int tick)
         {
             PresentExplorer.Move(tick - tickDiff);
-            foreach (var explorer in ExplorersFromPast)
+            foreach (var explorer in ExplorersFromPast.Except(removedExplorers))
                 explorer.Move(tick - tickDiff);
             PortalControl(tick);
         }

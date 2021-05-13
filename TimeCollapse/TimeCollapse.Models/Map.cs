@@ -28,7 +28,7 @@ namespace TimeCollapse.Models
         });
 
         private readonly List<Stage> stages;
-        public Stage ActualStage { get; set; }
+        public Stage ActualStage { get; private set; }
         private IEnumerator<Stage> stagesSwitcher;
 
 
