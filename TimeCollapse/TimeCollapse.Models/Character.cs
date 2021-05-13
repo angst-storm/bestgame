@@ -5,14 +5,14 @@ namespace TimeCollapse.Models
 {
     public abstract class Character
     {
-        private static readonly double maxSpeed = 16;
+        private const double MaxSpeed = 16;
         private readonly Game game;
         private Vector speed;
 
-        public Character(Game game, Point startLocation, Size colliderSize)
+        protected Character(Game game, Rectangle collider)
         {
             this.game = game;
-            Collider = new Rectangle(startLocation, colliderSize);
+            Collider = collider;
             speed = Vector.Zero;
         }
 
@@ -22,10 +22,10 @@ namespace TimeCollapse.Models
 
         public bool OnFloor { get; private set; }
 
-        public void Translate(Vector force)
+        protected CharacterState Translate(Vector force)
         {
             speed = new Vector(force.X, speed.Y + (force.Y + 1));
-            if (speed.Length > maxSpeed) speed = speed.Normalize() * maxSpeed;
+            if (speed.Length > MaxSpeed) speed = speed.Normalize() * MaxSpeed;
             var offset = new Vector(Location) + speed;
             var offsetCollider = new Rectangle(offset.ToPoint(), Collider.Size);
             foreach (var block in game.ActualMap.Blocks.Where(offsetCollider.IntersectsWith))
@@ -58,15 +58,30 @@ namespace TimeCollapse.Models
             Collider = offsetCollider;
 
             OnFloor = game.ActualMap.Blocks.Any(block => Collider.Bottom == block.Top &&
-                                                         (Collider.Left >= block.Left && Collider.Left <= block.Right ||
+                                                         (Collider.Left >= block.Left &&
+                                                          Collider.Left <= block.Right ||
                                                           Collider.Right >= block.Left &&
                                                           Collider.Right <= block.Right));
+            return new CharacterState(Collider, speed, OnFloor);
         }
 
-        public void Teleport(Point spawn)
+        protected CharacterState ChangePosition(Point position)
         {
-            speed = Vector.Zero;
-            Collider = new Rectangle(spawn, Collider.Size);
+            Collider = new Rectangle(position, Collider.Size);
+            speed = new Vector(0, 0);
+            OnFloor = game.ActualMap.Blocks.Any(block => Collider.Bottom == block.Top &&
+                                                         (Collider.Left >= block.Left &&
+                                                          Collider.Left <= block.Right ||
+                                                          Collider.Right >= block.Left &&
+                                                          Collider.Right <= block.Right));
+            return new CharacterState(Collider, speed, OnFloor);
+        }
+
+        protected void AcceptTheState(CharacterState state)
+        {
+            Collider = state.Collider;
+            speed = state.Speed;
+            OnFloor = state.OnFloor;
         }
 
         public abstract void Move(int tick);

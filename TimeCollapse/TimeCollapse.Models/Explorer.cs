@@ -5,15 +5,22 @@ namespace TimeCollapse.Models
 {
     public class Explorer : Character
     {
-        private readonly Point startLocation;
-        private readonly Queue<Vector> translates = new();
+        private const int RunSpeed = 5;
+        private const int JumpSpeed = 15;
+        private readonly Game game;
+        private readonly Point spawn;
+        private readonly List<(int, CharacterState)> states = new();
+        private int repeatIndexer;
+        private bool repeatMode;
 
-        private bool present = true;
-
-        public Explorer(Game game, Point startLocation, Size colliderSize) : base(game, startLocation, colliderSize)
+        public Explorer(Game game, Stage stage) : base(game, new Rectangle(stage.Spawn, new Size(16, 32)))
         {
-            this.startLocation = startLocation;
+            this.game = game;
+            spawn = stage.Spawn;
+            Target = stage.Target;
         }
+
+        public Rectangle Target { get; }
 
         public bool Jump { get; set; }
         public bool RightRun { get; set; }
@@ -21,22 +28,25 @@ namespace TimeCollapse.Models
 
         public override void Move(int tick)
         {
-            Vector move;
-            if (present)
-                move = (Jump && OnFloor ? new Vector(0, -15) : Vector.Zero) +
-                       (RightRun ? new Vector(5, 0) : Vector.Zero) +
-                       (LeftRun ? new Vector(-5, 0) : Vector.Zero);
-            else
-                move = translates.Dequeue();
-
-            translates.Enqueue(move);
-            Translate(move);
+            if (!repeatMode)
+            {
+                var move = (Jump && OnFloor ? new Vector(0, -JumpSpeed) : Vector.Zero) +
+                           (RightRun ? new Vector(RunSpeed, 0) : Vector.Zero) +
+                           (LeftRun ? new Vector(-RunSpeed, 0) : Vector.Zero);
+                states.Add((tick, Translate(move)));
+            }
+            else if (repeatIndexer < states.Count && states[repeatIndexer].Item1 == tick)
+            {
+                AcceptTheState(states[repeatIndexer].Item2);
+                repeatIndexer++;
+            }
         }
 
-        public void ToPast()
+        public void Repeat()
         {
-            Teleport(startLocation);
-            present = false;
+            ChangePosition(spawn);
+            repeatMode = true;
+            repeatIndexer = 0;
         }
     }
 }

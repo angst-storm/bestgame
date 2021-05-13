@@ -22,38 +22,41 @@ namespace TimeCollapse.Models
             new Rectangle(48, 432, 80, 16)
         }, new[]
         {
-            (new Point(64, 672), new Point(64, 382)),
-            (new Point(480, 672), new Point(64, 382)),
-            (new Point(944, 672), new Point(64, 382))
+            new Stage(new Point(64, 672), new Rectangle(64, 382, 32, 32)),
+            new Stage(new Point(480, 672), new Rectangle(64, 382, 32, 32)),
+            new Stage(new Point(944, 672), new Rectangle(64, 382, 32, 32))
         });
 
-        private readonly List<(Point, Point, int)> stages;
-        private (Point, Point, int) actualStage;
+        private readonly List<Stage> stages;
+        public Stage ActualStage { get; set; }
+        private IEnumerator<Stage> stagesSwitcher;
 
 
-        public Map(IEnumerable<Rectangle> blocks, IEnumerable<(Point, Point)> spawnsAndTargets)
+        private Map(IEnumerable<Rectangle> blocks, IEnumerable<Stage> stages)
         {
             Blocks = blocks.ToHashSet();
-            stages = spawnsAndTargets.Select((st, i) => (st.Item1, st.Item2, i)).ToList();
-            actualStage = stages.First();
+            this.stages = stages.ToList();
+            stagesSwitcher = this.stages.GetEnumerator();
+            if (stagesSwitcher.MoveNext())
+                ActualStage = stagesSwitcher.Current;
         }
 
         public HashSet<Rectangle> Blocks { get; }
-        public Point ActualSpawn => actualStage.Item1;
-        public Rectangle ActualTarget => new(actualStage.Item2, new Size(32, 32));
 
         public bool TrySwitchStage()
         {
-            if (actualStage.Item3 + 1 == stages.Count)
+            if (!stagesSwitcher.MoveNext())
                 return false;
 
-            actualStage = stages[actualStage.Item3 + 1];
+            ActualStage = stagesSwitcher.Current;
             return true;
         }
 
         public void ResetStages()
         {
-            actualStage = stages.First();
+            stagesSwitcher = stages.GetEnumerator();
+            if (stagesSwitcher.MoveNext())
+                ActualStage = stagesSwitcher.Current;
         }
     }
 }

@@ -1,66 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace TimeCollapse.Models
 {
     public class Game
     {
-        public static readonly Game TestGame = new(new List<Map> {Map.TestMap}, new Size(16, 32));
-        private Explorer DefaultExplorer() => new Explorer(this, ActualMap.ActualSpawn, PresentExplorer.Collider.Size);
+        public static readonly Game TestGame = new(new List<Map> {Map.TestMap});
 
-        public Game(List<Map> maps, Size explorerColliderSize)
+        private readonly List<Explorer> removedExplorers = new();
+        private int tickDiff = 0;
+
+        private Game(List<Map> maps)
         {
             if (!maps.Any()) throw new InvalidOperationException();
             Maps = maps;
             ActualMap = Maps.First();
-            PresentExplorer = new Explorer(this, ActualMap.ActualSpawn, explorerColliderSize);
+            PresentExplorer = new Explorer(this, ActualMap.ActualStage);
             ExplorersFromPast = new List<Explorer>();
-            PreviousAttemptWin = false;
         }
 
         public Map ActualMap { get; }
         public List<Map> Maps { get; }
         public Explorer PresentExplorer { get; private set; }
         public List<Explorer> ExplorersFromPast { get; }
-        public bool PreviousAttemptWin { get; private set; }
 
-        private void PortalControl()
+        private void PortalControl(int tick)
         {
-            if (PresentExplorer.Collider.IntersectsWith(ActualMap.ActualTarget))
+            if (PresentExplorer.Collider.IntersectsWith(PresentExplorer.Target))
             {
                 if (ActualMap.TrySwitchStage())
                 {
                     ExplorersFromPast.Add(PresentExplorer);
                     foreach (var explorer in ExplorersFromPast)
-                        explorer.ToPast();
-                    PresentExplorer = DefaultExplorer();
+                        explorer.Repeat();
+                    PresentExplorer = new Explorer(this, ActualMap.ActualStage);
                 }
                 else
                 {
                     ActualMap.ResetStages();
                     ExplorersFromPast.Clear();
-                    PresentExplorer = DefaultExplorer();
-                    PreviousAttemptWin = true;
+                    PresentExplorer = new Explorer(this, ActualMap.ActualStage);
                 }
             }
 
-            if (ExplorersFromPast.Any(e => e.Collider.IntersectsWith(ActualMap.ActualTarget)))
+            if (ExplorersFromPast.Any(e => e.Collider.IntersectsWith(e.Target)))
             {
                 ActualMap.ResetStages();
                 ExplorersFromPast.Clear();
-                PresentExplorer = DefaultExplorer();
-                PreviousAttemptWin = false;
+                PresentExplorer = new Explorer(this, ActualMap.ActualStage);
             }
+
+            tickDiff = tick + 1;
         }
 
         public void Update(int tick)
         {
-            PortalControl();
-            PresentExplorer.Move(tick);
+            PresentExplorer.Move(tick - tickDiff);
             foreach (var explorer in ExplorersFromPast)
-                explorer.Move(tick);
+                explorer.Move(tick - tickDiff);
+            PortalControl(tick);
         }
     }
 }
