@@ -22,9 +22,9 @@ namespace TimeCollapse.Models
             new Rectangle(48, 432, 80, 16)
         }, new[]
         {
-            new Stage(new Point(64, 672), new Rectangle(64, 382, 32, 32)),
-            new Stage(new Point(480, 672), new Rectangle(64, 382, 32, 32)),
-            new Stage(new Point(944, 672), new Rectangle(64, 382, 32, 32))
+            new Stage(new Point(64, 640), new Rectangle(64, 382, 32, 32)),
+            new Stage(new Point(480, 640), new Rectangle(64, 382, 32, 32)),
+            new Stage(new Point(944, 640), new Rectangle(64, 382, 32, 32))
         });
 
         private readonly List<Stage> stages;

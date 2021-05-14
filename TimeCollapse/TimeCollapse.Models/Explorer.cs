@@ -7,15 +7,13 @@ namespace TimeCollapse.Models
     {
         private const int RunSpeed = 5;
         private const int JumpSpeed = 15;
-        private readonly Game game;
         private readonly Point spawn;
         private readonly List<(int, CharacterState)> states = new();
         private int repeatIndexer;
         private bool repeatMode;
 
-        public Explorer(Game game, Stage stage) : base(game, new Rectangle(stage.Spawn, new Size(16, 32)))
+        public Explorer(Game game, Stage stage) : base(game, new Rectangle(stage.Spawn, new Size(32, 64)))
         {
-            this.game = game;
             spawn = stage.Spawn;
             Target = stage.Target;
         }

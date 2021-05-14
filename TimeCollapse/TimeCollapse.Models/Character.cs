@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace TimeCollapse.Models
 {
@@ -14,6 +15,7 @@ namespace TimeCollapse.Models
             this.game = game;
             Collider = collider;
             speed = Vector.Zero;
+            TurnedRight = true;
         }
 
         public Rectangle Collider { get; private set; }
@@ -21,6 +23,8 @@ namespace TimeCollapse.Models
         public Point Location => Collider.Location;
 
         public bool OnFloor { get; private set; }
+
+        public bool TurnedRight { get; private set; }
 
         protected CharacterState Translate(Vector force)
         {
@@ -62,7 +66,14 @@ namespace TimeCollapse.Models
                                                           Collider.Left <= block.Right ||
                                                           Collider.Right >= block.Left &&
                                                           Collider.Right <= block.Right));
-            return new CharacterState(Collider, speed, OnFloor);
+            TurnedRight = force.X switch
+            {
+                > 0 => true,
+                < 0 => false,
+                _ => TurnedRight
+            };
+
+            return new CharacterState(Collider, speed, OnFloor, TurnedRight);
         }
 
         protected CharacterState ChangePosition(Point position)
@@ -74,7 +85,7 @@ namespace TimeCollapse.Models
                                                           Collider.Left <= block.Right ||
                                                           Collider.Right >= block.Left &&
                                                           Collider.Right <= block.Right));
-            return new CharacterState(Collider, speed, OnFloor);
+            return new CharacterState(Collider, speed, OnFloor, TurnedRight);
         }
 
         protected void AcceptTheState(CharacterState state)
@@ -82,6 +93,7 @@ namespace TimeCollapse.Models
             Collider = state.Collider;
             speed = state.Speed;
             OnFloor = state.OnFloor;
+            TurnedRight = state.TurnedRight;
         }
 
         public abstract void Move(int tick);

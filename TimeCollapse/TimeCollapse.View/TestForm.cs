@@ -8,14 +8,23 @@ namespace TimeCollapse.View
 {
     public partial class TestForm : Form
     {
+        private readonly Image astronautRight;
+        private readonly Image astronautLeft;
         private readonly Game game;
-        private readonly Timer updateTimer;
         private int timerTick;
 
         public TestForm()
         {
+            astronautRight =
+                Image.FromFile(
+                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/AstroStay Right.png");
+            astronautLeft = 
+                Image.FromFile(
+                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/AstroStay Right.png");
+            astronautLeft.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            
             game = Game.TestGame;
-            updateTimer = new Timer {Interval = 10};
+            var updateTimer = new Timer {Interval = 10};
             updateTimer.Tick += UpdateTimerTick;
             InitializeComponent();
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
@@ -32,8 +41,9 @@ namespace TimeCollapse.View
             var explorerPen = new Pen(Color.Brown, 2);
             var targetPen = new SolidBrush(Color.Green);
             g.FillRectangles(blockBrush, game.ActualMap.Blocks.ToArray());
-            g.DrawRectangles(explorerPen, game.AllExplorers.Select(explorer => explorer.Collider).ToArray());
             g.FillRectangle(targetPen, game.ActualMap.ActualStage.Target);
+            foreach (var explorer in game.AllExplorers)
+                g.DrawImage(explorer.TurnedRight ? astronautRight : astronautLeft, explorer.Collider);
         }
 
         private void UpdateTimerTick(object sender, EventArgs e)
