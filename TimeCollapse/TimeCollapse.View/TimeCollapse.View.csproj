@@ -7,8 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Update="TestForm.cs">
+      <Compile Update="MainForm.cs">
         <SubType>Form</SubType>
+      </Compile>
+      <Compile Update="GameControl.cs">
+        <SubType>UserControl</SubType>
+      </Compile>
+      <Compile Update="MenuControl.cs">
+        <SubType>UserControl</SubType>
+      </Compile>
+      <Compile Update="PauseControl.cs">
+        <SubType>UserControl</SubType>
       </Compile>
     </ItemGroup>
 
