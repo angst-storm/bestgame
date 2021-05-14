@@ -28,7 +28,6 @@ namespace TimeCollapse.Models
         });
 
         private readonly List<Stage> stages;
-        public Stage ActualStage { get; private set; }
         private IEnumerator<Stage> stagesSwitcher;
 
 
@@ -40,6 +39,8 @@ namespace TimeCollapse.Models
             if (stagesSwitcher.MoveNext())
                 ActualStage = stagesSwitcher.Current;
         }
+
+        public Stage ActualStage { get; private set; }
 
         public HashSet<Rectangle> Blocks { get; }
 

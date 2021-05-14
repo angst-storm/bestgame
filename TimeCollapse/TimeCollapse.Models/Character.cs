@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Linq;
-using System.Xml.Serialization;
 
 namespace TimeCollapse.Models
 {

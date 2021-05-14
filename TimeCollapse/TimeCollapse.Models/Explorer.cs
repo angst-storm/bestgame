@@ -12,14 +12,14 @@ namespace TimeCollapse.Models
         private int repeatIndexer;
         private bool repeatMode;
 
-        public Explorer(Game game, Stage stage) : base(game, new Rectangle(stage.Spawn, new Size(32, 64)))
+        public Explorer(Game game, Stage stage) : base(game, new Rectangle(stage.Spawn, DefaultColliderSize))
         {
             spawn = stage.Spawn;
             Target = stage.Target;
         }
 
+        private static Size DefaultColliderSize => new(32, 64);
         public Rectangle Target { get; }
-
         public bool Jump { get; set; }
         public bool RightRun { get; set; }
         public bool LeftRun { get; set; }
