@@ -41,6 +41,7 @@ namespace TimeCollapse.View
 
         public void PauseGame()
         {
+            game.UpdateTimer.Stop();
             game.Enabled = false;
             game.Hide();
             pause.Enabled = true;

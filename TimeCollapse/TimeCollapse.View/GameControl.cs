@@ -7,7 +7,7 @@ using static TimeCollapse.Models.FieldOfViewCalculator;
 
 namespace TimeCollapse.View
 {
-    public class GameControl : UserControl
+    public sealed class GameControl : UserControl
     {
         private readonly Image astronautLeft;
         private readonly Image astronautRight;
@@ -21,14 +21,19 @@ namespace TimeCollapse.View
             mainForm = form;
 
             astronautRight =
-                Image.FromFile(
-                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/AstroStay Right.png");
-            astronautLeft =
-                Image.FromFile(
-                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/AstroStay Right.png");
-            astronautLeft.RotateFlip(RotateFlipType.RotateNoneFlipX);
-            game = Game.TestGame;
+                new Bitmap(Image.FromFile(
+                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/AstroStay Right.png"));
 
+            astronautLeft =
+                new Bitmap(Image.FromFile(
+                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/AstroStay Right.png"));
+            astronautLeft.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+            BackgroundImage =
+                new Bitmap(Image.FromFile(
+                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/GameBackground.png"));
+
+            game = Game.TestGame;
             ClientSize = new Size(1024, 768);
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
@@ -50,7 +55,7 @@ namespace TimeCollapse.View
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;
-            g.FillRectangles(new SolidBrush(Color.Black), game.ActualMap.Blocks.ToArray());
+            g.FillRectangles(new SolidBrush(Color.DarkSlateGray), game.ActualMap.Blocks.ToArray());
             g.FillRectangle(new SolidBrush(Color.Green), game.ActualMap.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {
@@ -68,10 +73,7 @@ namespace TimeCollapse.View
             if (e.KeyCode == Keys.D)
                 game.PresentExplorer.RightRun = true;
             if (e.KeyCode == Keys.Escape)
-            {
-                UpdateTimer.Stop();
                 mainForm.PauseGame();
-            }
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
