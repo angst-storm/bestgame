@@ -22,9 +22,9 @@ namespace TimeCollapse.Models
             new Rectangle(48, 432, 80, 16)
         }, new[]
         {
-            new Stage(new Point(64, 640), new Rectangle(64, 382, 32, 32)),
-            new Stage(new Point(480, 640), new Rectangle(64, 382, 32, 32)),
-            new Stage(new Point(944, 640), new Rectangle(64, 382, 32, 32))
+            new Stage(new Point(64, 640), new Rectangle(64, 366, 48, 64)),
+            new Stage(new Point(480, 640), new Rectangle(64, 366, 48, 64)),
+            new Stage(new Point(944, 640), new Rectangle(64, 366, 48, 64))
         });
 
         private readonly List<Stage> stages;
@@ -47,7 +47,10 @@ namespace TimeCollapse.Models
         public bool TrySwitchStage()
         {
             if (!stagesSwitcher.MoveNext())
+            {
+                ActualStage = stages[0];
                 return false;
+            }
 
             ActualStage = stagesSwitcher.Current;
             return true;

@@ -9,8 +9,9 @@ namespace TimeCollapse.View
 {
     public sealed class GameControl : UserControl
     {
-        private readonly Image astronautLeft;
-        private readonly Image astronautRight;
+        private readonly Bitmap astronautLeft;
+        private readonly Bitmap astronautRight;
+        private readonly Bitmap portal;
         private readonly Game game;
         private readonly MainForm mainForm;
         public readonly Timer UpdateTimer;
@@ -28,6 +29,10 @@ namespace TimeCollapse.View
                 new Bitmap(Image.FromFile(
                     @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/AstroStay Right.png"));
             astronautLeft.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            
+            portal =
+                new Bitmap(Image.FromFile(
+                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/Portal.png"));
 
             BackgroundImage =
                 new Bitmap(Image.FromFile(
@@ -56,7 +61,7 @@ namespace TimeCollapse.View
         {
             var g = e.Graphics;
             g.FillRectangles(new SolidBrush(Color.DarkSlateGray), game.ActualMap.Blocks.ToArray());
-            g.FillRectangle(new SolidBrush(Color.Green), game.ActualMap.ActualStage.Target);
+            g.DrawImage(portal, game.ActualMap.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {
                 g.DrawPolygon(new Pen(Color.Goldenrod, 3), GetFieldOfView(game, explorer));

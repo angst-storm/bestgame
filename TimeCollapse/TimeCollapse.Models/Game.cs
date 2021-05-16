@@ -8,24 +8,33 @@ namespace TimeCollapse.Models
     {
         public static readonly Game TestGame = new(new List<Map> {Map.TestMap});
         private readonly List<Explorer> removedExplorers = new();
+        private int actualMapIndex;
         private int tickDiff;
 
         private Game(List<Map> maps)
         {
             if (!maps.Any()) throw new InvalidOperationException();
             Maps = maps;
-            ActualMap = Maps.First();
-            PresentExplorer = new Explorer(this, ActualMap.ActualStage);
-            ExplorersFromPast = new List<Explorer>();
+            StartLevel(0);
         }
 
-        public Map ActualMap { get; }
+        public Map ActualMap { get; private set; }
         public List<Map> Maps { get; }
         public Explorer PresentExplorer { get; private set; }
-        public List<Explorer> ExplorersFromPast { get; }
+        public List<Explorer> ExplorersFromPast { get; } = new();
 
         public List<Explorer> AllExplorers =>
             ExplorersFromPast.Except(removedExplorers).Concat(new[] {PresentExplorer}).ToList();
+
+        private void StartLevel(int index)
+        {
+            if (index == Maps.Count)
+                index = 0;
+            ActualMap = Maps[index];
+            actualMapIndex = index;
+            PresentExplorer = new Explorer(this, ActualMap.ActualStage);
+            ExplorersFromPast.Clear();
+        }
 
         private void PortalControl(int tick)
         {
@@ -41,10 +50,7 @@ namespace TimeCollapse.Models
                 }
                 else
                 {
-                    ActualMap.ResetStages();
-                    ExplorersFromPast.Clear();
-                    removedExplorers.Clear();
-                    PresentExplorer = new Explorer(this, ActualMap.ActualStage);
+                    StartLevel(actualMapIndex + 1);
                 }
             }
 
