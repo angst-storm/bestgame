@@ -19,8 +19,7 @@ namespace TimeCollapse.View
             SuspendLayout();
             Name = "MenuControl";
             ClientSize = new Size(1024, 768);
-            BackgroundImage = new Bitmap(Image.FromFile(
-                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/GameBackground.png"));
+            BackgroundImage = new Bitmap(Image.FromFile(@"Assets/Background.png"));
 
             var startButton = new Button
             {

@@ -9,8 +9,8 @@ namespace TimeCollapse.View
 {
     public sealed class GameControl : UserControl
     {
-        private readonly Bitmap astronautLeft;
-        private readonly Bitmap astronautRight;
+        private readonly Bitmap explorerLeft;
+        private readonly Bitmap explorerRight;
         private readonly Bitmap portal;
         private readonly Game game;
         private readonly MainForm mainForm;
@@ -21,22 +21,14 @@ namespace TimeCollapse.View
         {
             mainForm = form;
 
-            astronautRight =
-                new Bitmap(Image.FromFile(
-                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/AstroStay Right.png"));
-
-            astronautLeft =
-                new Bitmap(Image.FromFile(
-                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/AstroStay Right.png"));
-            astronautLeft.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            explorerRight = new Bitmap(Image.FromFile(@"Assets\Explorer.png"));
             
-            portal =
-                new Bitmap(Image.FromFile(
-                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/Portal.png"));
+            explorerLeft = new Bitmap(Image.FromFile(@"Assets\Explorer.png"));
+            explorerLeft.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            
+            portal = new Bitmap(Image.FromFile(@"Assets\Portal.png"));
 
-            BackgroundImage =
-                new Bitmap(Image.FromFile(
-                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/GameBackground.png"));
+            BackgroundImage = new Bitmap(Image.FromFile(@"Assets\Background.png"));
 
             game = Game.TestGame;
             ClientSize = new Size(1024, 768);
@@ -65,7 +57,7 @@ namespace TimeCollapse.View
             foreach (var explorer in game.AllExplorers)
             {
                 g.DrawPolygon(new Pen(Color.Goldenrod, 3), GetFieldOfView(game, explorer));
-                g.DrawImage(explorer.TurnedRight ? astronautRight : astronautLeft, explorer.Collider);
+                g.DrawImage(explorer.TurnedRight ? explorerRight : explorerLeft, explorer.Collider);
             }
         }
 

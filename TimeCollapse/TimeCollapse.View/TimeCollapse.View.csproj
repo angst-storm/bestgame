@@ -31,4 +31,19 @@
       <ProjectReference Include="..\TimeCollapse.Models\TimeCollapse.Models.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Assets\Background.png" />
+      <Content Include="Assets\Background.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Explorer.png" />
+      <None Remove="Assets\Portal.png" />
+      <Content Include="Assets\Explorer.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Assets\Portal.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
