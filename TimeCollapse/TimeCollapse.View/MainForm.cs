@@ -15,11 +15,13 @@ namespace TimeCollapse.View
             menu = new MenuControl(this) {Enabled = true};
             menu.Show();
 
-            game = new GameControl(this);
+            game = new GameControl(this) {Enabled = false};
+            game.Hide();
 
-            pause = new PauseControl(this);
+            pause = new PauseControl(this) {Enabled = false};
+            pause.Hide();
 
-            Controls.AddRange(new Control[] {menu, game, pause});
+            Controls.AddRange(new Control[] {menu, pause, game});
             ResumeLayout(false);
 
             Name = "TimeCollapse";
@@ -43,7 +45,6 @@ namespace TimeCollapse.View
         {
             game.UpdateTimer.Stop();
             game.Enabled = false;
-            game.Hide();
             pause.Enabled = true;
             pause.Show();
         }
@@ -53,7 +54,6 @@ namespace TimeCollapse.View
             pause.Enabled = false;
             pause.Hide();
             game.Enabled = true;
-            game.Show();
             game.UpdateTimer.Start();
         }
     }

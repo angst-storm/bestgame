@@ -17,28 +17,24 @@ namespace TimeCollapse.View
         private void InitializeComponent()
         {
             SuspendLayout();
+            Name = "MenuControl";
+            ClientSize = new Size(1024, 768);
+            BackgroundImage = new Bitmap(Image.FromFile(
+                    @"C:\Users\serez\OneDrive\Рабочий стол\Учебные материалы\ПРОГА\Ulearn\bestgame\TimeCollapse\Assets/GameBackground.png"));
+
             var startButton = new Button
             {
-                Location = new Point(20, 20),
                 Name = "StartButton",
-                Size = new Size(100, 50),
-                TabIndex = 0,
+                Location = new Point(362, 210),
+                Size = new Size(300, 100),
+                BackColor = Color.DarkSlateGray,
                 Text = @"Start Game",
-                UseVisualStyleBackColor = true
+                Font = new Font("Palatino Linotype", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 204)
             };
-            startButton.Click += StartButtonClick;
+            startButton.Click += (sender, args) => mainForm.StartGame();
+            
             Controls.Add(startButton);
-
-            Name = "MenuControl";
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1024, 768);
-            AutoScaleDimensions = new SizeF(8F, 16F);
             ResumeLayout(false);
-        }
-
-        private void StartButtonClick(object sender, EventArgs e)
-        {
-            mainForm.StartGame();
         }
     }
 }

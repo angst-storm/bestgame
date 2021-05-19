@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace TimeCollapse.View
@@ -14,28 +13,24 @@ namespace TimeCollapse.View
             InitializeComponent();
         }
 
-        private void ResumeButtonClick(object sender, EventArgs e)
-        {
-            mainForm.ResumeGame();
-        }
-
         private void InitializeComponent()
         {
             SuspendLayout();
+            Name = "PauseControl";
+            Size = new Size(100, 50);
+
             var resumeButton = new Button
             {
-                Location = new Point(20, 20),
+                Location = new Point(0, 0),
                 Name = "ResumeButton",
                 Size = new Size(100, 50),
                 Text = @"Resume",
-                UseVisualStyleBackColor = true
+                UseVisualStyleBackColor = true,
+                BackColor = Color.DarkSlateGray
             };
-            resumeButton.Click += ResumeButtonClick;
-            Controls.Add(resumeButton);
+            resumeButton.Click += (sender, args) => mainForm.ResumeGame();
 
-            Name = "PauseControl";
-            AutoScaleMode = AutoScaleMode.Font;
-            AutoScaleDimensions = new SizeF(8F, 16F);
+            Controls.Add(resumeButton);
             ResumeLayout(false);
         }
     }
