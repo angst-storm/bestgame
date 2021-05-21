@@ -24,6 +24,8 @@ namespace TimeCollapse.Models
         public bool OnFloor { get; private set; }
 
         public bool TurnedRight { get; private set; }
+        
+        public bool Go { get; private set; }
 
         protected CharacterState Translate(Vector force)
         {
@@ -72,7 +74,9 @@ namespace TimeCollapse.Models
                 _ => TurnedRight
             };
 
-            return new CharacterState(Collider, speed, OnFloor, TurnedRight);
+            Go = force.X != 0;
+
+            return new CharacterState(Collider, speed, OnFloor, TurnedRight, Go);
         }
 
         protected CharacterState ChangePosition(Point position)
@@ -84,7 +88,8 @@ namespace TimeCollapse.Models
                                                           Collider.Left <= block.Right ||
                                                           Collider.Right >= block.Left &&
                                                           Collider.Right <= block.Right));
-            return new CharacterState(Collider, speed, OnFloor, TurnedRight);
+            Go = false;
+            return new CharacterState(Collider, speed, OnFloor, TurnedRight, Go);
         }
 
         protected void AcceptTheState(CharacterState state)
@@ -93,6 +98,7 @@ namespace TimeCollapse.Models
             speed = state.Speed;
             OnFloor = state.OnFloor;
             TurnedRight = state.TurnedRight;
+            Go = state.Go;
         }
 
         public abstract void Move(int tick);
