@@ -40,7 +40,8 @@ namespace TimeCollapse.View
             var table = new TableLayoutPanel
             {
                 Location = tableLocation,
-                Size = tableSize
+                Size = tableSize,
+                BackColor = Color.FromArgb(18, 62, 64)
             };
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));

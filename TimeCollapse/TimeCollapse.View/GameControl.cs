@@ -117,7 +117,8 @@ namespace TimeCollapse.View
                 game.PresentExplorer.LeftRun = true;
             if (e.KeyCode == Keys.D)
                 game.PresentExplorer.RightRun = true;
-            if (e.KeyCode == Keys.Escape) PauseGame();
+            if (e.KeyCode == Keys.Escape)
+                PauseGame();
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
@@ -173,7 +174,8 @@ namespace TimeCollapse.View
             {
                 Location = tableLocation,
                 Size = tableSize,
-                Enabled = false
+                Enabled = false,
+                BackColor = Color.FromArgb(18, 62, 64)
             };
             pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
             pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
@@ -188,6 +190,7 @@ namespace TimeCollapse.View
                 2);
             pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Exit", pauseTable.Size.Height / 20, Application.Exit),
                 0, 3);
+            pauseTable.KeyDown += (sender, args) => { if (args.KeyCode == Keys.Escape) ResumeGame();};
             return pauseTable;
         }
     }
