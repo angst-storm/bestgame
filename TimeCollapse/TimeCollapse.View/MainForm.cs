@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace TimeCollapse.View
 {
@@ -7,25 +6,25 @@ namespace TimeCollapse.View
     {
         private readonly GameControl game;
         private readonly MenuControl menu;
-        private readonly PauseControl pause;
 
         public MainForm()
         {
+            Name = "TimeCollapse";
+            ClientSize = Screen.PrimaryScreen.Bounds.Size;
+            StartPosition = FormStartPosition.CenterScreen;
+            WindowState = FormWindowState.Maximized;
+            FormBorderStyle = FormBorderStyle.None;
+
             SuspendLayout();
             menu = new MenuControl(this) {Enabled = true};
             menu.Show();
+            menu.Focus();
 
             game = new GameControl(this) {Enabled = false};
             game.Hide();
 
-            pause = new PauseControl(this) {Enabled = false};
-            pause.Hide();
-
-            Controls.AddRange(new Control[] {menu, pause, game});
+            Controls.AddRange(new Control[] {menu, game});
             ResumeLayout(false);
-
-            Name = "TimeCollapse";
-            ClientSize = new Size(1024, 768);
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.AllPaintingInWmPaint |
@@ -37,24 +36,21 @@ namespace TimeCollapse.View
         {
             menu.Enabled = false;
             menu.Hide();
+
             game.Enabled = true;
             game.Show();
+            game.Focus();
+            game.StartGame();
         }
 
-        public void PauseGame()
+        public void ToMainMenu()
         {
-            game.UpdateTimer.Stop();
             game.Enabled = false;
-            pause.Enabled = true;
-            pause.Show();
-        }
-
-        public void ResumeGame()
-        {
-            pause.Enabled = false;
-            pause.Hide();
-            game.Enabled = true;
-            game.UpdateTimer.Start();
+            game.Hide();
+            
+            menu.Enabled = true;
+            menu.Show();
+            menu.Focus();
         }
     }
 }

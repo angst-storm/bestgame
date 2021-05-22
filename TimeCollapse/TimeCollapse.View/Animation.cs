@@ -1,4 +1,4 @@
-﻿namespace TimeCollapse.View.Assets
+﻿namespace TimeCollapse.View
 {
     public enum Animation
     {

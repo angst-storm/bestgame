@@ -4,17 +4,14 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using TimeCollapse.Models;
-using TimeCollapse.View.Assets;
-using static TimeCollapse.Models.FieldOfViewCalculator;
 
 namespace TimeCollapse.View
 {
     public sealed class GameControl : UserControl
     {
         private readonly Dictionary<Explorer, (Animation, IEnumerator<Bitmap>)> animationsEnumerators = new();
-        private readonly Game game;
         private readonly MainForm mainForm;
-        public readonly Timer UpdateTimer;
+        private readonly Control pause;
         private Bitmap background;
         private List<Bitmap> explorerJumpLeft;
         private List<Bitmap> explorerJumpRight;
@@ -22,27 +19,51 @@ namespace TimeCollapse.View
         private List<Bitmap> explorerRight;
         private List<Bitmap> explorerWalkLeft;
         private List<Bitmap> explorerWalkRight;
+        private Game game;
         private Bitmap portal;
         private int timerTick;
+        private Timer updateTimer;
 
         public GameControl(MainForm form)
         {
+            mainForm = form;
             ImportAssets();
 
-            mainForm = form;
+            ClientSize = mainForm.Size;
             BackgroundImage = background;
-            ClientSize = new Size(1024, 768);
+
+            pause = InitializePause();
+            Controls.Add(pause);
+            pause.Hide();
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint, true);
             UpdateStyles();
+        }
 
+        public void StartGame()
+        {
             game = Game.TestGame;
+            updateTimer = new Timer {Interval = 10};
+            updateTimer.Tick += UpdateTimerTick;
+            updateTimer.Start();
+        }
 
-            UpdateTimer = new Timer {Interval = 10};
-            UpdateTimer.Tick += UpdateTimerTick;
-            UpdateTimer.Start();
+        private void PauseGame()
+        {
+            updateTimer.Stop();
+            pause.Enabled = true;
+            pause.Show();
+            pause.Focus();
+        }
+
+        private void ResumeGame()
+        {
+            pause.Enabled = false;
+            pause.Hide();
+            Focus();
+            updateTimer.Start();
         }
 
         private void UpdateTimerTick(object sender, EventArgs e)
@@ -58,7 +79,7 @@ namespace TimeCollapse.View
             g.DrawImage(portal, game.ActualMap.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {
-                g.DrawPolygon(new Pen(Color.Goldenrod, 3), GetFieldOfView(game, explorer));
+                g.DrawPolygon(new Pen(Color.Goldenrod, 3), FieldOfViewCalculator.GetFieldOfView(game, explorer));
                 g.DrawImage(GetCurrentSprite(explorer), explorer.Collider);
             }
         }
@@ -96,8 +117,7 @@ namespace TimeCollapse.View
                 game.PresentExplorer.LeftRun = true;
             if (e.KeyCode == Keys.D)
                 game.PresentExplorer.RightRun = true;
-            if (e.KeyCode == Keys.Escape)
-                mainForm.PauseGame();
+            if (e.KeyCode == Keys.Escape) PauseGame();
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
@@ -120,28 +140,55 @@ namespace TimeCollapse.View
             explorerLeft = new List<Bitmap> {explorerLeftImage};
 
             var explorerWalkRightImage = new Bitmap(Image.FromFile(@"Assets\ExploWalk.png"));
-            explorerWalkRight = SplitImage(explorerWalkRightImage, new Size(16 * 3, 32 * 3)).ToList();
+            explorerWalkRight = SplitImage(explorerWalkRightImage, new Size(16 * 3, 32 * 3), 5).ToList();
 
             explorerWalkRightImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
-            explorerWalkLeft = SplitImage(explorerWalkRightImage, new Size(16 * 3, 32 * 3)).ToList();
+            explorerWalkLeft = SplitImage(explorerWalkRightImage, new Size(16 * 3, 32 * 3), 5).ToList();
 
             var explorerJumpImage = new Bitmap(Image.FromFile(@"Assets\ExploJump.png"));
-            explorerJumpRight = SplitImage(explorerJumpImage, new Size(16 * 3, 32 * 3)).ToList();
+            explorerJumpRight = SplitImage(explorerJumpImage, new Size(16 * 3, 32 * 3), 1).ToList();
 
             explorerJumpImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
-            explorerJumpLeft = SplitImage(explorerJumpImage, new Size(16 * 3, 32 * 3)).ToList();
+            explorerJumpLeft = SplitImage(explorerJumpImage, new Size(16 * 3, 32 * 3), 1).ToList();
 
             portal = new Bitmap(Image.FromFile(@"Assets\Portal.png"));
 
             background = new Bitmap(Image.FromFile(@"Assets\Background.png"));
         }
 
-        private static IEnumerable<Bitmap> SplitImage(Bitmap image, Size part)
+        private static IEnumerable<Bitmap> SplitImage(Bitmap image, Size part, int delay)
         {
             for (var i = 0; i < image.Size.Height / part.Height; i++)
             for (var j = 0; j < image.Size.Width / part.Width; j++)
+            for (var k = 0; k < delay; k++)
                 yield return image.Clone(new Rectangle(new Point(part.Width * j, part.Height * i), part),
                     image.PixelFormat);
+        }
+
+        private TableLayoutPanel InitializePause()
+        {
+            var tableLocation = new Point(ClientSize.Width / 192, ClientSize.Height / 108);
+            var tableSize = new Size(ClientSize.Width / 5, ClientSize.Height / 2);
+            var pauseTable = new TableLayoutPanel
+            {
+                Location = tableLocation,
+                Size = tableSize,
+                Enabled = false
+            };
+            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            pauseTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Resume", pauseTable.Size.Height / 20, ResumeGame), 0,
+                0);
+            pauseTable.Controls.Add(
+                MenuControl.MyDefaultButton(@"Main Menu", pauseTable.Size.Height / 20, mainForm.ToMainMenu), 0, 1);
+            pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Settings", pauseTable.Size.Height / 20, () => { }), 0,
+                2);
+            pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Exit", pauseTable.Size.Height / 20, Application.Exit),
+                0, 3);
+            return pauseTable;
         }
     }
 }

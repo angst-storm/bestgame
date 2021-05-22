@@ -4,36 +4,64 @@ using System.Windows.Forms;
 
 namespace TimeCollapse.View
 {
-    public class MenuControl : UserControl
+    public sealed class MenuControl : UserControl
     {
-        private readonly MainForm mainForm;
-
         public MenuControl(MainForm form)
         {
-            mainForm = form;
-            InitializeComponent();
+            ClientSize = form.Size;
+            BackColor = Color.FromArgb(18, 62, 64);
+
+            SuspendLayout();
+            var table = InitializeTable();
+
+            table.Controls.Add(new Label
+            {
+                Text = @"TimeCollapse",
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font("Pixel Times", (float) table.Size.Height / 16),
+                Dock = DockStyle.Fill
+            }, 0, 0);
+
+            table.Controls.Add(MyDefaultButton(@"StartGame", table.Size.Height / 20, form.StartGame), 0, 1);
+
+            table.Controls.Add(MyDefaultButton(@"Settings", table.Size.Height / 20, () => { }), 0, 2);
+
+            table.Controls.Add(MyDefaultButton(@"Exit", table.Size.Height / 20, Application.Exit), 0, 3);
+
+            Controls.Add(table);
+            ResumeLayout(false);
         }
 
-        private void InitializeComponent()
+        private TableLayoutPanel InitializeTable()
         {
-            SuspendLayout();
-            Name = "MenuControl";
-            ClientSize = new Size(1024, 768);
-            BackgroundImage = new Bitmap(Image.FromFile(@"Assets/Background.png"));
-
-            var startButton = new Button
+            var tableSize = new Size(ClientSize.Width / 4, ClientSize.Height / 2);
+            var tableLocation = new Point(ClientSize.Width / 2 - tableSize.Width / 2,
+                ClientSize.Height / 2 - tableSize.Height / 2);
+            var table = new TableLayoutPanel
             {
-                Name = "StartButton",
-                Location = new Point(362, 210),
-                Size = new Size(300, 100),
-                BackColor = Color.DarkSlateGray,
-                Text = @"Start Game",
-                Font = new Font("Palatino Linotype", 16.2F, FontStyle.Regular, GraphicsUnit.Point, 204)
+                Location = tableLocation,
+                Size = tableSize
             };
-            startButton.Click += (sender, args) => mainForm.StartGame();
-            
-            Controls.Add(startButton);
-            ResumeLayout(false);
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            return table;
+        }
+
+        public static Button MyDefaultButton(string text, int textSize, Action action)
+        {
+            var button = new Button
+            {
+                Text = text,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font("Pixel Times", textSize),
+                BackColor = Color.DarkSlateGray,
+                Dock = DockStyle.Fill
+            };
+            button.Click += (sender, args) => action();
+            return button;
         }
     }
 }
