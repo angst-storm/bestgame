@@ -79,7 +79,7 @@ namespace TimeCollapse.View
             g.DrawImage(portal, game.ActualMap.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {
-                g.DrawPolygon(new Pen(Color.Goldenrod, 3), FieldOfViewCalculator.GetFieldOfView(game, explorer));
+                g.DrawPolygon(new Pen(Color.Goldenrod, 3), explorer.GetFieldOfView());
                 g.DrawImage(GetCurrentSprite(explorer), explorer.Collider);
             }
         }
@@ -190,7 +190,10 @@ namespace TimeCollapse.View
                 2);
             pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Exit", pauseTable.Size.Height / 20, Application.Exit),
                 0, 3);
-            pauseTable.KeyDown += (sender, args) => { if (args.KeyCode == Keys.Escape) ResumeGame();};
+            pauseTable.KeyDown += (sender, args) =>
+            {
+                if (args.KeyCode == Keys.Escape) ResumeGame();
+            };
             return pauseTable;
         }
     }

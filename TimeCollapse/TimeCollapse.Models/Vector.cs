@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading;
 
 namespace TimeCollapse.Models
 {
@@ -20,6 +21,13 @@ namespace TimeCollapse.Models
         {
             X = point.X;
             Y = point.Y;
+        }
+
+        public Vector((Point, Point) section)
+        {
+            var (start, end) = section;
+            X = end.X - start.X;
+            Y = end.Y - start.X;
         }
 
         public double Length => Math.Sqrt(X * X + Y * Y);
@@ -59,14 +67,14 @@ namespace TimeCollapse.Models
             }
         }
 
-        public static Vector operator -(Vector a, Vector b)
-        {
-            return new(a.X - b.X, a.Y - b.Y);
-        }
-
         public static Vector operator *(Vector a, double k)
         {
             return new(a.X * k, a.Y * k);
+        }
+        
+        public static Vector operator *(double k, Vector a)
+        {
+            return a * k;
         }
 
         public static Vector operator /(Vector a, double k)
@@ -74,19 +82,24 @@ namespace TimeCollapse.Models
             return new(a.X / k, a.Y / k);
         }
 
-        public static Vector operator *(double k, Vector a)
-        {
-            return a * k;
-        }
-
         public static Vector operator +(Vector a, Vector b)
         {
             return new(a.X + b.X, a.Y + b.Y);
+        }
+        
+        public static Vector operator -(Vector a, Vector b)
+        {
+            return new(a.X - b.X, a.Y - b.Y);
         }
 
         public Vector Normalize()
         {
             return Length > 0 ? this * (1 / Length) : this;
+        }
+
+        public Vector PerpendicularVector(bool clockwise)
+        {
+            return clockwise ? new Vector(Y, -X) : new Vector(-Y, X);
         }
     }
 }
