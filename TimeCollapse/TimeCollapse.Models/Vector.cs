@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Drawing;
-using System.Threading;
 
 namespace TimeCollapse.Models
 {
     public class Vector
     {
+        private const double Epsilon = 1e-6;
         public static readonly Vector Zero = new(0, 0);
 
         public readonly double X;
@@ -34,7 +34,7 @@ namespace TimeCollapse.Models
 
         private static bool DoubleEquals(double a, double b)
         {
-            return Math.Abs(a - b) < 1e-6;
+            return Math.Abs(a - b) < Epsilon;
         }
 
         public Point ToPoint()
@@ -71,7 +71,7 @@ namespace TimeCollapse.Models
         {
             return new(a.X * k, a.Y * k);
         }
-        
+
         public static Vector operator *(double k, Vector a)
         {
             return a * k;
@@ -86,7 +86,7 @@ namespace TimeCollapse.Models
         {
             return new(a.X + b.X, a.Y + b.Y);
         }
-        
+
         public static Vector operator -(Vector a, Vector b)
         {
             return new(a.X - b.X, a.Y - b.Y);
@@ -95,6 +95,16 @@ namespace TimeCollapse.Models
         public Vector Normalize()
         {
             return Length > 0 ? this * (1 / Length) : this;
+        }
+
+        public bool IsZero()
+        {
+            return Math.Abs(X) + Math.Abs(Y) <= Epsilon;
+        }
+
+        public bool Cross(Vector other)
+        {
+            return Math.Abs(X * other.Y - Y * other.X) > Epsilon;
         }
 
         public Vector PerpendicularVector(bool clockwise)

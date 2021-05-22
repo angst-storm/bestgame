@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 
 namespace TimeCollapse.Models
 {
@@ -15,32 +14,15 @@ namespace TimeCollapse.Models
             return GetViewTriangle(e);
         }
 
-        public static Point[] GetFieldOfViewNonTrivial(this Explorer e, Game game)
+        private static Point[] GetViewTriangle(Explorer e)
         {
             var viewRect = GetViewRectangle(e);
-            var location = new Point(e.TurnedRight ? viewRect.Left : viewRect.Right,
-                viewRect.Top + viewRect.Size.Height / 2);
-            var viewDirection = new Vector(e.TurnedRight ? 1 : -1, 0);
-            var colliders = game.ActualMap.Blocks
-                .Where(r => r.IntersectsWith(viewRect))
-                .ToList();
-
-            var sections = colliders
-                .SelectMany(r => new[]
-                {
-                    (new Point(r.Left, r.Top), new Point(r.Left, r.Bottom)),
-                    (new Point(r.Right, r.Top), new Point(r.Right, r.Bottom)),
-                    (new Point(r.Left, r.Top), new Point(r.Right, r.Top)),
-                    (new Point(r.Left, r.Bottom), new Point(r.Right, r.Top))
-                })
-                .ToList();
-
-            var anglePoints = sections
-                .SelectMany(s => new[] {s.Item1, s.Item2})
-                .Distinct()
-                .ToList();
-
-            return anglePoints.ToArray();
+            return new[]
+            {
+                new Point(e.TurnedRight ? viewRect.Left : viewRect.Right, viewRect.Top + viewRect.Size.Height / 2),
+                new Point(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Top),
+                new Point(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Bottom)
+            };
         }
 
         private static Rectangle GetViewRectangle(Explorer e)
@@ -53,15 +35,24 @@ namespace TimeCollapse.Models
                 heightHalf * 2);
         }
 
-        private static Point[] GetViewTriangle(Explorer e)
+        public static Point[] GetFieldOfViewNonTrivial(this Explorer e, Game game, Vector start)
         {
-            var viewRect = GetViewRectangle(e);
-            return new[]
-            {
-                new Point(e.TurnedRight ? viewRect.Left : viewRect.Right, viewRect.Top + viewRect.Size.Height / 2),
-                new Point(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Top),
-                new Point(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Bottom)
-            };
+            return Array.Empty<Point>();
+        }
+
+        public static bool RayCross(Vector rayStart, Vector rayVector, (Vector, Vector) line, out Vector result)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static (double, double, double) FindTheLineClerics(Vector a, Vector b)
+        {
+            return (b.Y - a.Y, b.X - a.X, a.X * b.Y - b.X * a.Y);
+        }
+
+        public static bool PointOnLine(Vector point, (Vector, Vector) line)
+        {
+            throw new NotImplementedException();
         }
     }
 }
