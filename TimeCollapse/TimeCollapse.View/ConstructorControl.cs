@@ -21,12 +21,23 @@ namespace TimeCollapse.View
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 7));
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 93));
             table.Controls.Add(InitializeControlTable(), 0, 0);
-            table.Controls.Add(new MapConstructor(this) {Dock = DockStyle.Fill}, 0, 1);
+
+            table.Controls.Add(Screen.PrimaryScreen.Bounds.Size == new Size(1920,1080) 
+                ? new MapConstructor(this) {Dock = DockStyle.Fill}
+                : new Label
+                {
+                    Text = @"К сожалению, пока конструктор доступен только пользователям с разрешением экрана 1920 на 1080",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    BackColor = Color.Azure,
+                    Dock = DockStyle.Fill
+                }, 0, 1);
             Controls.Add(table);
         }
 
         public ComboBox Details { get; private set; }
         public ComboBox Stages { get; private set; }
+        public Button RefreshButton { get; private set; }
+        public TextBox ResultText {get; private set;}
 
         private TableLayoutPanel InitializeControlTable()
         {
@@ -47,15 +58,15 @@ namespace TimeCollapse.View
             
             table.Controls.Add(new Control(), 3, 0);
 
-            var resultText = new TextBox
+            ResultText = new TextBox
             {
                 Dock = DockStyle.Fill,
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical
             };
-            table.Controls.Add(TextOperationsTable(resultText), 4, 0);
+            table.Controls.Add(TextOperationsTable(ResultText), 4, 0);
 
-            table.Controls.Add(resultText, 5, 0);
+            table.Controls.Add(ResultText, 5, 0);
 
             return table;
         }
@@ -146,13 +157,13 @@ namespace TimeCollapse.View
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
             
-            var refresh = new Button
+            RefreshButton = new Button
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.Azure,
                 Text = @"Обновить"
             };
-            table.Controls.Add(refresh, 0, 0);
+            table.Controls.Add(RefreshButton, 0, 0);
             
             var copy = new Button
             {
