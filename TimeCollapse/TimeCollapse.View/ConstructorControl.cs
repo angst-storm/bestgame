@@ -18,15 +18,16 @@ namespace TimeCollapse.View
                 Location = new Point(),
                 Size = ClientSize
             };
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 7));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 93));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 90));
             table.Controls.Add(InitializeControlTable(), 0, 0);
 
-            table.Controls.Add(Screen.PrimaryScreen.Bounds.Size == new Size(1920,1080) 
+            table.Controls.Add(Screen.PrimaryScreen.Bounds.Size == new Size(1920, 1080)
                 ? new MapConstructor(this) {Dock = DockStyle.Fill}
                 : new Label
                 {
-                    Text = @"К сожалению, пока конструктор доступен только пользователям с разрешением экрана 1920 на 1080",
+                    Text =
+                        @"К сожалению, пока конструктор доступен только пользователям с разрешением экрана 1920 на 1080",
                     TextAlign = ContentAlignment.MiddleCenter,
                     BackColor = Color.Azure,
                     Dock = DockStyle.Fill
@@ -37,7 +38,9 @@ namespace TimeCollapse.View
         public ComboBox Details { get; private set; }
         public ComboBox Stages { get; private set; }
         public Button RefreshButton { get; private set; }
-        public TextBox ResultText {get; private set;}
+        public Button Increment { get; private set; }
+        public Button Decrement { get; private set; }
+        public TextBox ResultText { get; private set; }
 
         private TableLayoutPanel InitializeControlTable()
         {
@@ -45,28 +48,19 @@ namespace TimeCollapse.View
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
 
             table.Controls.Add(ExitButton(), 0, 0);
 
             table.Controls.Add(DetailsTable(), 1, 0);
 
             table.Controls.Add(StagesTable(), 2, 0);
-            
-            table.Controls.Add(new Control(), 3, 0);
 
-            ResultText = new TextBox
-            {
-                Dock = DockStyle.Fill,
-                Multiline = true,
-                ScrollBars = ScrollBars.Vertical
-            };
-            table.Controls.Add(TextOperationsTable(ResultText), 4, 0);
+            table.Controls.Add(new Panel(), 3, 0);
 
-            table.Controls.Add(ResultText, 5, 0);
+            table.Controls.Add(TextOperationsTable(), 4, 0);
 
             return table;
         }
@@ -83,97 +77,115 @@ namespace TimeCollapse.View
             return exitButton;
         }
 
-        private TableLayoutPanel DetailsTable()
+        private GroupBox DetailsTable()
         {
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Элементы", ForeColor = Color.Azure};
+
             var table = new TableLayoutPanel {Dock = DockStyle.Fill};
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 60));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-            var label = new Label
-            {
-                Dock = DockStyle.Fill,
-                ForeColor = Color.Azure,
-                Text = @"Элементы:"
-            };
-            table.Controls.Add(label, 0, 0);
-
-            Details = new ComboBox
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.Azure
-            };
+            table.Controls.Add(new Panel(), 0, 0);
+            Details = new ComboBox {Dock = DockStyle.Fill, BackColor = Color.Azure};
             Details.Items.AddRange(new object[] {"Блок", "Стартовый прямоугольник", "Целевой прямоугольник"});
             Details.SelectedIndex = 0;
-            table.Controls.Add(Details, 0, 1);
+            table.Controls.Add(Details, 0, 0);
 
-            return table;
+            group.Controls.Add(table);
+
+            return group;
         }
 
-        private TableLayoutPanel StagesTable()
+        private GroupBox StagesTable()
         {
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Стадии", ForeColor = Color.Azure};
+
             var table = new TableLayoutPanel {Dock = DockStyle.Fill};
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 60));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
-
-            var label = new Label
-            {
-                Dock = DockStyle.Fill,
-                ForeColor = Color.Azure,
-                Text = @"Стадии:"
-            };
-            table.Controls.Add(label, 0, 0);
-
-            Stages = new ComboBox
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.Azure
-            };
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
+            Stages = new ComboBox {Dock = DockStyle.Fill, BackColor = Color.Azure};
             Stages.Items.Add(0);
             Stages.SelectedIndex = 0;
-            table.Controls.Add(Stages, 0, 1);
+            table.Controls.Add(Stages, 0, 0);
 
-            var increment = new Button
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Stages.Size.Height));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Stages.Size.Height));
+
+            Decrement = new Button
+            {
+                Size = new Size(Stages.Size.Height, Stages.Size.Height),
+                Text = @"-",
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = Color.Black,
+                BackColor = Color.Azure
+            };
+            Decrement.Click += (sender, args) =>
+            {
+                if (Stages.Items.Count > 1)
+                    Stages.Items.RemoveAt(Stages.Items.Count - 1);
+                Stages.SelectedIndex = Stages.Items.Count - 1;
+            };
+            table.Controls.Add(Decrement, 1, 0);
+
+            Increment = new Button
             {
                 Size = new Size(Stages.Size.Height, Stages.Size.Height),
                 Text = @"+",
-                BackColor = Color.Azure,
-                TextAlign = ContentAlignment.MiddleCenter
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = Color.Black,
+                BackColor = Color.Azure
             };
-            increment.Click += (sender, args) =>
+            Increment.Click += (sender, args) =>
             {
                 Stages.Items.Add(Stages.Items.Count);
                 Stages.SelectedIndex = Stages.Items.Count - 1;
             };
-            table.Controls.Add(increment, 1, 1);
+            table.Controls.Add(Increment, 2, 0);
 
-            return table;
+            group.Controls.Add(table);
+
+            return group;
         }
 
-        private TableLayoutPanel TextOperationsTable(TextBox textBox)
+        private TableLayoutPanel TextOperationsTable()
         {
             var table = new TableLayoutPanel {Dock = DockStyle.Fill};
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-            
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
+
+            ResultText = new TextBox
+            {
+                Dock = DockStyle.Fill,
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                ReadOnly = true
+            };
+
+            table.Controls.Add(ResultText, 1, 0);
+
+            var buttonsTable = new TableLayoutPanel {Dock = DockStyle.Fill, Margin = new Padding(0)};
+            buttonsTable.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            buttonsTable.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+
             RefreshButton = new Button
             {
                 Dock = DockStyle.Fill,
+                ForeColor = Color.Black,
                 BackColor = Color.Azure,
                 Text = @"Обновить"
             };
-            table.Controls.Add(RefreshButton, 0, 0);
-            
-            var copy = new Button
+            buttonsTable.Controls.Add(RefreshButton, 0, 0);
+
+            var copyButton = new Button
             {
                 Dock = DockStyle.Fill,
+                ForeColor = Color.Black,
                 BackColor = Color.Azure,
                 Text = @"Скопировать"
             };
-            copy.Click += (sender, args) => Clipboard.SetText(textBox.Text);
-            table.Controls.Add(copy, 0, 1);
-            
+            copyButton.Click += (sender, args) => Clipboard.SetText(ResultText.Text);
+            buttonsTable.Controls.Add(copyButton, 0, 1);
+
+            table.Controls.Add(buttonsTable, 0, 0);
+
             return table;
         }
     }
