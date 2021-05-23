@@ -18,7 +18,7 @@ namespace TimeCollapse.Models
             Target = stage.Target;
         }
 
-        private static Size DefaultColliderSize => new(32, 64);
+        public static Size DefaultColliderSize => new(32, 64);
         public Rectangle Target { get; }
         public bool Jump { get; set; }
         public bool RightRun { get; set; }
