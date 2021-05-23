@@ -16,6 +16,12 @@
       <Compile Update="MenuControl.cs">
         <SubType>UserControl</SubType>
       </Compile>
+      <Compile Update="MapConstructor.cs">
+        <SubType>UserControl</SubType>
+      </Compile>
+      <Compile Update="ConstructorControl.cs">
+        <SubType>UserControl</SubType>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

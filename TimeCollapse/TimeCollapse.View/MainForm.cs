@@ -4,6 +4,7 @@ namespace TimeCollapse.View
 {
     public class MainForm : Form
     {
+        private readonly ConstructorControl constructor;
         private readonly GameControl game;
         private readonly MenuControl menu;
 
@@ -23,13 +24,11 @@ namespace TimeCollapse.View
             game = new GameControl(this) {Enabled = false};
             game.Hide();
 
-            Controls.AddRange(new Control[] {menu, game});
-            ResumeLayout(false);
+            constructor = new ConstructorControl(this) {Enabled = false};
+            constructor.Hide();
 
-            SetStyle(ControlStyles.OptimizedDoubleBuffer |
-                     ControlStyles.AllPaintingInWmPaint |
-                     ControlStyles.UserPaint, true);
-            UpdateStyles();
+            Controls.AddRange(new Control[] {menu, game, constructor});
+            ResumeLayout(false);
         }
 
         public void StartGame()
@@ -47,10 +46,20 @@ namespace TimeCollapse.View
         {
             game.Enabled = false;
             game.Hide();
-            
+
             menu.Enabled = true;
             menu.Show();
             menu.Focus();
+        }
+
+        public void ToConstructor()
+        {
+            menu.Enabled = false;
+            menu.Hide();
+
+            constructor.Enabled = true;
+            constructor.Show();
+            constructor.Focus();
         }
     }
 }
