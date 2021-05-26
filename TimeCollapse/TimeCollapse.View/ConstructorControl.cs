@@ -73,7 +73,7 @@ namespace TimeCollapse.View
                 BackColor = Color.Azure,
                 Dock = DockStyle.Fill
             };
-            exitButton.Click += (sender, args) => mainForm.ToMainMenu();
+            exitButton.Click += (sender, args) => mainForm.ToMainMenu(this);
             return exitButton;
         }
 

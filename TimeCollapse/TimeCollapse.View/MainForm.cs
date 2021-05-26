@@ -32,10 +32,20 @@ namespace TimeCollapse.View
             ResumeLayout(false);
         }
 
-        public void StartGame()
+        public void ToMainMenu(UserControl from)
         {
-            menu.Enabled = false;
-            menu.Hide();
+            from.Enabled = false;
+            from.Hide();
+
+            menu.Enabled = true;
+            menu.Show();
+            menu.Focus();
+        }
+
+        public void StartGame(UserControl from)
+        {
+            from.Enabled = false;
+            from.Hide();
 
             game.Enabled = true;
             game.Show();
@@ -43,20 +53,10 @@ namespace TimeCollapse.View
             game.StartGameSeries(Map.Plot);
         }
 
-        public void ToMainMenu()
+        public void ToConstructor(UserControl from)
         {
-            game.Enabled = false;
-            game.Hide();
-
-            menu.Enabled = true;
-            menu.Show();
-            menu.Focus();
-        }
-
-        public void ToConstructor()
-        {
-            menu.Enabled = false;
-            menu.Hide();
+            from.Enabled = false;
+            from.Hide();
 
             constructor.Enabled = true;
             constructor.Show();

@@ -138,7 +138,7 @@ namespace TimeCollapse.View
         private bool TryTakeExistingRectangle(Point point, out Rectangle rect)
         {
             rect = Rectangle.Empty;
-            
+
             switch (ActiveDetail)
             {
                 case ConstructorDetail.Block when blocks.Any(b => b.Contains(point)):

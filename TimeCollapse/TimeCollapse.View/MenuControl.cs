@@ -22,11 +22,13 @@ namespace TimeCollapse.View
                 Dock = DockStyle.Fill
             }, 0, 0);
 
-            table.Controls.Add(MyDefaultButton(@"StartGame", table.Size.Height / 20, form.StartGame), 0, 1);
+            table.Controls.Add(
+                MyDefaultButton(@"StartGame", table.Size.Height / 20, () => form.StartGame(this)), 0, 1);
 
             table.Controls.Add(MyDefaultButton(@"Select Map", table.Size.Height / 20, () => { }), 0, 2);
 
-            table.Controls.Add(MyDefaultButton(@"Map Constructor", table.Size.Height / 20, form.ToConstructor), 0, 3);
+            table.Controls.Add(
+                MyDefaultButton(@"Map Constructor", table.Size.Height / 20, () => form.ToConstructor(this)), 0, 3);
 
             table.Controls.Add(MyDefaultButton(@"Exit", table.Size.Height / 20, Application.Exit), 0, 4);
 

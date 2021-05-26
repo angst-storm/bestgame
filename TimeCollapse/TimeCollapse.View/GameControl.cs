@@ -42,35 +42,17 @@ namespace TimeCollapse.View
 
             EnabledChanged += (sender, args) =>
             {
-                if (Enabled) updateTimer.Start();
-                else updateTimer.Stop();
+                if (!Enabled)
+                {
+                    ResumeGame();
+                    updateTimer.Stop();
+                }
             };
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint, true);
             UpdateStyles();
-        }
-
-        public void StartGameSeries(IEnumerable<Map> levels)
-        {
-            levelsEnumerator = levels.GetEnumerator();
-            SwitchLevel();
-            updateTimer.Start();
-        }
-
-        private void SwitchLevel()
-        {
-            if (levelsEnumerator.MoveNext())
-            {
-                game = new Game(levelsEnumerator.Current);
-                timerTick = 0;
-            }
-            else
-            {
-                updateTimer.Stop();
-                mainForm.ToMainMenu();
-            }
         }
 
         private void PauseGame()
@@ -95,6 +77,26 @@ namespace TimeCollapse.View
             Refresh();
             if (game.GameOver)
                 SwitchLevel();
+        }
+
+        public void StartGameSeries(IEnumerable<Map> levels)
+        {
+            levelsEnumerator = levels.GetEnumerator();
+            SwitchLevel();
+            updateTimer.Start();
+        }
+
+        private void SwitchLevel()
+        {
+            if (levelsEnumerator.MoveNext())
+            {
+                game = new Game(levelsEnumerator.Current);
+                timerTick = 0;
+            }
+            else
+            {
+                mainForm.ToMainMenu(this);
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -210,8 +212,10 @@ namespace TimeCollapse.View
             pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Resume", pauseTable.Size.Height / 20, ResumeGame), 0,
                 0);
             pauseTable.Controls.Add(
-                MenuControl.MyDefaultButton(@"Main Menu", pauseTable.Size.Height / 20, mainForm.ToMainMenu), 0, 1);
-            pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Select Map", pauseTable.Size.Height / 20, () => { }), 0,
+                MenuControl.MyDefaultButton(@"Main Menu", pauseTable.Size.Height / 20, () => mainForm.ToMainMenu(this)),
+                0, 1);
+            pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Select Map", pauseTable.Size.Height / 20, () => { }),
+                0,
                 2);
             pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Exit", pauseTable.Size.Height / 20, Application.Exit),
                 0, 3);
