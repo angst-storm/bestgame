@@ -6,7 +6,7 @@ namespace TimeCollapse.Models
 {
     public class Map
     {
-        private static readonly Map TestMap = new(new[]
+        private static readonly Map TestMap = new("Тестовая карта", new[]
         {
             new Rectangle(32, 720, 960, 16),
             new Rectangle(32, 544, 16, 176),
@@ -27,7 +27,7 @@ namespace TimeCollapse.Models
             new Stage(new Point(944, 640), new Rectangle(64, 366, 48, 64))
         });
 
-        private static readonly Map SpiralMap = new(new[]
+        private static readonly Map SpiralMap = new("Простая спираль", new[]
         {
             new Rectangle(416, 848, 1072, 16),
             new Rectangle(416, 752, 16, 96),
@@ -51,15 +51,18 @@ namespace TimeCollapse.Models
 
         private readonly List<Stage> stages;
         private readonly IEnumerator<Stage> stagesSwitcher;
-        
-        private Map(IEnumerable<Rectangle> blocks, IEnumerable<Stage> stages)
+
+        private Map(string name, IEnumerable<Rectangle> blocks, IEnumerable<Stage> stages)
         {
+            Name = name;
             Blocks = blocks.ToHashSet();
             this.stages = stages.ToList();
             stagesSwitcher = this.stages.GetEnumerator();
             if (stagesSwitcher.MoveNext())
                 ActualStage = stagesSwitcher.Current;
         }
+
+        public string Name { get; }
 
         public Stage ActualStage { get; private set; }
 

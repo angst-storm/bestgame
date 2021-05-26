@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Collections.Generic;
+using System.Windows.Forms;
 using TimeCollapse.Models;
 
 namespace TimeCollapse.View
@@ -42,7 +43,7 @@ namespace TimeCollapse.View
             menu.Focus();
         }
 
-        public void StartGame(UserControl from)
+        public void StartGame(UserControl from, IEnumerable<Map> levels)
         {
             from.Enabled = false;
             from.Hide();
@@ -50,7 +51,7 @@ namespace TimeCollapse.View
             game.Enabled = true;
             game.Show();
             game.Focus();
-            game.StartGameSeries(Map.Plot);
+            game.StartGameSeries(levels);
         }
 
         public void ToConstructor(UserControl from)
