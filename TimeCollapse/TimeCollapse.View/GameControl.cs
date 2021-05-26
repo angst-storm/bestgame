@@ -12,6 +12,7 @@ namespace TimeCollapse.View
         private readonly Dictionary<Explorer, (Animation, IEnumerator<Bitmap>)> animationsEnumerators = new();
         private readonly MainForm mainForm;
         private readonly Control pause;
+        private readonly Timer updateTimer;
         private Bitmap background;
         private List<Bitmap> explorerJumpLeft;
         private List<Bitmap> explorerJumpRight;
@@ -20,9 +21,9 @@ namespace TimeCollapse.View
         private List<Bitmap> explorerWalkLeft;
         private List<Bitmap> explorerWalkRight;
         private Game game;
+        private IEnumerator<Map> levelsEnumerator;
         private Bitmap portal;
         private int timerTick;
-        private Timer updateTimer;
 
         public GameControl(MainForm form)
         {
@@ -36,18 +37,40 @@ namespace TimeCollapse.View
             Controls.Add(pause);
             pause.Hide();
 
+            updateTimer = new Timer {Interval = 10};
+            updateTimer.Tick += UpdateTimerTick;
+
+            EnabledChanged += (sender, args) =>
+            {
+                if (Enabled) updateTimer.Start();
+                else updateTimer.Stop();
+            };
+
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint, true);
             UpdateStyles();
         }
 
-        public void StartGame()
+        public void StartGameSeries(IEnumerable<Map> levels)
         {
-            game = Game.TestGame;
-            updateTimer = new Timer {Interval = 10};
-            updateTimer.Tick += UpdateTimerTick;
+            levelsEnumerator = levels.GetEnumerator();
+            SwitchLevel();
             updateTimer.Start();
+        }
+
+        private void SwitchLevel()
+        {
+            if (levelsEnumerator.MoveNext())
+            {
+                game = new Game(levelsEnumerator.Current);
+                timerTick = 0;
+            }
+            else
+            {
+                updateTimer.Stop();
+                mainForm.ToMainMenu();
+            }
         }
 
         private void PauseGame()
@@ -70,13 +93,15 @@ namespace TimeCollapse.View
         {
             game.Update(timerTick++);
             Refresh();
+            if (game.GameOver)
+                SwitchLevel();
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;
-            g.FillRectangles(new SolidBrush(Color.DarkSlateGray), game.ActualMap.Blocks.ToArray());
-            g.DrawImage(portal, game.ActualMap.ActualStage.Target);
+            g.FillRectangles(new SolidBrush(Color.DarkSlateGray), game.Map.Blocks.ToArray());
+            g.DrawImage(portal, game.Map.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {
                 g.DrawPolygon(new Pen(Color.Goldenrod, 3), explorer.GetFieldOfView());
@@ -186,7 +211,7 @@ namespace TimeCollapse.View
                 0);
             pauseTable.Controls.Add(
                 MenuControl.MyDefaultButton(@"Main Menu", pauseTable.Size.Height / 20, mainForm.ToMainMenu), 0, 1);
-            pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Settings", pauseTable.Size.Height / 20, () => { }), 0,
+            pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Select Map", pauseTable.Size.Height / 20, () => { }), 0,
                 2);
             pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Exit", pauseTable.Size.Height / 20, Application.Exit),
                 0, 3);

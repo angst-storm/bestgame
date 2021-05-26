@@ -1,4 +1,5 @@
 ﻿using System.Windows.Forms;
+using TimeCollapse.Models;
 
 namespace TimeCollapse.View
 {
@@ -39,7 +40,7 @@ namespace TimeCollapse.View
             game.Enabled = true;
             game.Show();
             game.Focus();
-            game.StartGame();
+            game.StartGameSeries(Map.Plot);
         }
 
         public void ToMainMenu()

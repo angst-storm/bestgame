@@ -1,60 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace TimeCollapse.Models
 {
     public class Game
     {
-        public static readonly Game TestGame = new(new List<Map> {Map.TestMap});
+        private readonly List<Explorer> explorersFromPast = new();
         private readonly List<Explorer> removedExplorers = new();
-        private int actualMapIndex;
         private int tickDiff;
 
-        private Game(List<Map> maps)
+        public Game(Map map)
         {
-            if (!maps.Any()) throw new InvalidOperationException();
-            Maps = maps;
-            StartLevel(0);
+            Map = map;
+            PresentExplorer = new Explorer(this, Map.ActualStage);
         }
 
-        public Map ActualMap { get; private set; }
-        public List<Map> Maps { get; }
+        public Map Map { get; }
         public Explorer PresentExplorer { get; private set; }
-        public List<Explorer> ExplorersFromPast { get; } = new();
+        
+        public bool GameOver { get; private set; }
 
-        public List<Explorer> AllExplorers =>
-            ExplorersFromPast.Except(removedExplorers).Concat(new[] {PresentExplorer}).ToList();
-
-        private void StartLevel(int index)
-        {
-            if (index == Maps.Count)
-                index = 0;
-            ActualMap = Maps[index];
-            actualMapIndex = index;
-            PresentExplorer = new Explorer(this, ActualMap.ActualStage);
-            ExplorersFromPast.Clear();
-        }
+        public IEnumerable<Explorer> AllExplorers =>
+            explorersFromPast.Except(removedExplorers).Concat(new[] {PresentExplorer});
 
         private void PortalControl(int tick)
         {
             if (PresentExplorer.Collider.IntersectsWith(PresentExplorer.Target))
             {
-                if (ActualMap.TrySwitchStage())
+                if (Map.TrySwitchStage())
                 {
-                    ExplorersFromPast.Add(PresentExplorer);
+                    explorersFromPast.Add(PresentExplorer);
                     removedExplorers.Clear();
-                    foreach (var explorer in ExplorersFromPast)
+                    foreach (var explorer in explorersFromPast)
                         explorer.Repeat();
-                    PresentExplorer = new Explorer(this, ActualMap.ActualStage);
+                    PresentExplorer = new Explorer(this, Map.ActualStage);
                 }
                 else
                 {
-                    StartLevel(actualMapIndex + 1);
+                    GameOver = true;
                 }
             }
 
-            foreach (var explorer in ExplorersFromPast.Where(e => e.Collider.IntersectsWith(e.Target)))
+            foreach (var explorer in explorersFromPast.Where(e => e.Collider.IntersectsWith(e.Target)))
                 removedExplorers.Add(explorer);
 
             tickDiff = tick + 1;
@@ -62,8 +49,8 @@ namespace TimeCollapse.Models
 
         public void Update(int tick)
         {
-            PresentExplorer.Move(tick - tickDiff);
-            foreach (var explorer in ExplorersFromPast.Except(removedExplorers))
+            
+            foreach (var explorer in AllExplorers)
                 explorer.Move(tick - tickDiff);
             PortalControl(tick);
         }

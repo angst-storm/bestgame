@@ -6,7 +6,7 @@ namespace TimeCollapse.Models
 {
     public class Map
     {
-        public static readonly Map TestMap = new(new[]
+        private static readonly Map TestMap = new(new[]
         {
             new Rectangle(32, 720, 960, 16),
             new Rectangle(32, 544, 16, 176),
@@ -27,10 +27,31 @@ namespace TimeCollapse.Models
             new Stage(new Point(944, 640), new Rectangle(64, 366, 48, 64))
         });
 
+        private static readonly Map SpiralMap = new(new[]
+        {
+            new Rectangle(416, 848, 1072, 16),
+            new Rectangle(416, 752, 16, 96),
+            new Rectangle(432, 752, 944, 16),
+            new Rectangle(1440, 752, 32, 16),
+            new Rectangle(1472, 656, 16, 192),
+            new Rectangle(528, 656, 944, 16),
+            new Rectangle(1280, 672, 16, 80),
+            new Rectangle(416, 560, 16, 192),
+            new Rectangle(432, 656, 32, 16),
+            new Rectangle(432, 560, 192, 16),
+            new Rectangle(608, 576, 16, 80)
+        }, new[]
+        {
+            new Stage(new Point(448, 784), new Rectangle(1312, 688, 48, 48)),
+            new Stage(new Point(1232, 688), new Rectangle(544, 592, 48, 48))
+        });
+
+        public static readonly Map[] Plot = {TestMap, SpiralMap};
+
+
         private readonly List<Stage> stages;
-        private IEnumerator<Stage> stagesSwitcher;
-
-
+        private readonly IEnumerator<Stage> stagesSwitcher;
+        
         private Map(IEnumerable<Rectangle> blocks, IEnumerable<Stage> stages)
         {
             Blocks = blocks.ToHashSet();
@@ -54,13 +75,6 @@ namespace TimeCollapse.Models
 
             ActualStage = stagesSwitcher.Current;
             return true;
-        }
-
-        public void ResetStages()
-        {
-            stagesSwitcher = stages.GetEnumerator();
-            if (stagesSwitcher.MoveNext())
-                ActualStage = stagesSwitcher.Current;
         }
     }
 }

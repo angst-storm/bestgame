@@ -33,7 +33,7 @@ namespace TimeCollapse.Models
             if (speed.Length > MaxSpeed) speed = speed.Normalize() * MaxSpeed;
             var offset = new Vector(Location) + speed;
             var offsetCollider = new Rectangle(offset.ToPoint(), Collider.Size);
-            foreach (var block in game.ActualMap.Blocks.Where(offsetCollider.IntersectsWith))
+            foreach (var block in game.Map.Blocks.Where(offsetCollider.IntersectsWith))
             {
                 if (offsetCollider.Right > block.Left && Collider.Right <= block.Left)
                 {
@@ -62,7 +62,7 @@ namespace TimeCollapse.Models
 
             Collider = offsetCollider;
 
-            OnFloor = game.ActualMap.Blocks.Any(block => Collider.Bottom == block.Top &&
+            OnFloor = game.Map.Blocks.Any(block => Collider.Bottom == block.Top &&
                                                          (Collider.Left >= block.Left &&
                                                           Collider.Left <= block.Right ||
                                                           Collider.Right >= block.Left &&
@@ -83,7 +83,7 @@ namespace TimeCollapse.Models
         {
             Collider = new Rectangle(position, Collider.Size);
             speed = new Vector(0, 0);
-            OnFloor = game.ActualMap.Blocks.Any(block => Collider.Bottom == block.Top &&
+            OnFloor = game.Map.Blocks.Any(block => Collider.Bottom == block.Top &&
                                                          (Collider.Left >= block.Left &&
                                                           Collider.Left <= block.Right ||
                                                           Collider.Right >= block.Left &&

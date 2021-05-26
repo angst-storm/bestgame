@@ -24,9 +24,11 @@ namespace TimeCollapse.View
 
             table.Controls.Add(MyDefaultButton(@"StartGame", table.Size.Height / 20, form.StartGame), 0, 1);
 
-            table.Controls.Add(MyDefaultButton(@"Map Constructor", table.Size.Height / 20, form.ToConstructor), 0, 2);
+            table.Controls.Add(MyDefaultButton(@"Select Map", table.Size.Height / 20, () => { }), 0, 2);
 
-            table.Controls.Add(MyDefaultButton(@"Exit", table.Size.Height / 20, Application.Exit), 0, 3);
+            table.Controls.Add(MyDefaultButton(@"Map Constructor", table.Size.Height / 20, form.ToConstructor), 0, 3);
+
+            table.Controls.Add(MyDefaultButton(@"Exit", table.Size.Height / 20, Application.Exit), 0, 4);
 
             Controls.Add(table);
             ResumeLayout(false);
@@ -43,10 +45,11 @@ namespace TimeCollapse.View
                 Size = tableSize,
                 BackColor = Color.FromArgb(18, 62, 64)
             };
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             return table;
         }
