@@ -103,6 +103,8 @@ namespace TimeCollapse.View
         {
             var g = e.Graphics;
             g.FillRectangles(new SolidBrush(Color.DarkSlateGray), game.Map.Blocks.ToArray());
+            if (game.Map.TimeAnomalies.Count != 0)
+                g.FillRectangles(new SolidBrush(Color.OrangeRed), game.Map.TimeAnomalies.ToArray());
             g.DrawImage(portal, game.Map.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {

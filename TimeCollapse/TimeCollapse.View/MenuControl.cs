@@ -69,7 +69,7 @@ namespace TimeCollapse.View
             return table;
         }
 
-        public static (TableLayoutPanel, ListBox) InitializeMapSelect(TableLayoutPanel menuTable)
+        private static (TableLayoutPanel, ListBox) InitializeMapSelect(TableLayoutPanel menuTable)
         {
             var table = new TableLayoutPanel
             {
@@ -89,7 +89,7 @@ namespace TimeCollapse.View
             var mapList = new ListBox
             {
                 Dock = DockStyle.Fill,
-                DataSource = Map.Plot,
+                DataSource = Map.AllMaps,
                 DisplayMember = "Name"
             };
             table.Controls.Add(mapList);

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 
@@ -6,7 +7,7 @@ namespace TimeCollapse.Models
 {
     public class Map
     {
-        private static readonly Map TestMap = new("Тестовая карта", new[]
+        public static readonly Map TestMap = new("Тестовая карта", new[]
         {
             new Rectangle(32, 720, 960, 16),
             new Rectangle(32, 544, 16, 176),
@@ -46,27 +47,37 @@ namespace TimeCollapse.Models
             new Stage(new Point(1232, 688), new Rectangle(544, 592, 48, 48))
         });
 
-        public static readonly Map[] Plot = {TestMap, SpiralMap};
-
+        public static readonly BindingList<Map> AllMaps = new();
 
         private readonly List<Stage> stages;
         private readonly IEnumerator<Stage> stagesSwitcher;
+
+        static Map()
+        {
+            foreach (var map in Plot)
+                AllMaps.Add(map);
+        }
 
         private Map(string name, IEnumerable<Rectangle> blocks, IEnumerable<Stage> stages)
         {
             Name = name;
             Blocks = blocks.ToHashSet();
+            TimeAnomalies = new HashSet<Rectangle>();
             this.stages = stages.ToList();
             stagesSwitcher = this.stages.GetEnumerator();
             if (stagesSwitcher.MoveNext())
                 ActualStage = stagesSwitcher.Current;
         }
 
+        public static Map[] Plot { get; } = {TestMap, SpiralMap};
+
         public string Name { get; }
 
         public Stage ActualStage { get; private set; }
 
         public HashSet<Rectangle> Blocks { get; }
+
+        public HashSet<Rectangle> TimeAnomalies { get; }
 
         public bool TrySwitchStage()
         {

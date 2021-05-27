@@ -17,7 +17,7 @@ namespace TimeCollapse.Models
 
         public Map Map { get; }
         public Explorer PresentExplorer { get; private set; }
-        
+
         public bool GameOver { get; private set; }
 
         public IEnumerable<Explorer> AllExplorers =>
@@ -49,10 +49,16 @@ namespace TimeCollapse.Models
 
         public void Update(int tick)
         {
-            
             foreach (var explorer in AllExplorers)
                 explorer.Move(tick - tickDiff);
             PortalControl(tick);
+            if (Map.TimeAnomalies.Any(a => a.IntersectsWith(PresentExplorer.Collider)))
+            {
+                removedExplorers.Clear();
+                foreach (var explorer in explorersFromPast)
+                    explorer.Repeat();
+                PresentExplorer = new Explorer(this, Map.ActualStage);
+            }
         }
     }
 }
