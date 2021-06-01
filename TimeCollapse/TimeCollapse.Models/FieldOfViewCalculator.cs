@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace TimeCollapse.Models
 {
@@ -8,24 +9,41 @@ namespace TimeCollapse.Models
     {
         private const int ViewAngleHalf = 15;
         private const int ViewingRange = 320;
-        private static double ViewAngleHalfRad => ViewAngleHalf * Math.PI / 180;
+        private const int NumberOfRays = 100;
+        private static double ViewAngleHalfRad => ViewAngleHalf * (Math.PI / 180);
 
-        public static Point[] GetFieldOfView(this Explorer e)
-        {
-            return GetViewTriangle(e);
-        }
-
-        private static Point[] GetViewTriangle(Explorer e)
+        public static Point[] GetFieldOfViewRayTracing(this Explorer e, Game game)
         {
             var viewRect = GetViewRectangle(e);
-            return new[]
+            var linesInSight = game.Map.Blocks.Where(b => b.IntersectsWith(viewRect)).SelectMany(b => new[]
             {
-                new Point(e.TurnedRight ? viewRect.Left : viewRect.Right, viewRect.Top + viewRect.Size.Height / 2),
-                new Point(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Top),
-                new Point(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Bottom)
-            };
+                (new Vector(b.Left, b.Top), new Vector(b.Right, b.Top)),
+                (new Vector(b.Left, b.Bottom), new Vector(b.Right, b.Bottom)),
+                (new Vector(b.Left, b.Top), new Vector(b.Left, b.Bottom)),
+                (new Vector(b.Right, b.Top), new Vector(b.Right, b.Bottom))
+            }).ToList();
+
+            var start = new Vector(e.TurnedRight ? viewRect.Left : viewRect.Right,
+                viewRect.Top + viewRect.Size.Height / 2);
+            var currentVector = new Vector(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Top) - start;
+            var dAngle = (e.TurnedRight ? -1 : 1) * ViewAngleHalfRad * 2 / NumberOfRays;
+
+            var result = new List<Point> {start.ToPoint()};
+            for (var i = 0; i < NumberOfRays; i++)
+            {
+                var shortestCrossedRay = start + currentVector;
+                foreach (var line in linesInSight)
+                    if (RayCross(start, currentVector, line, out var cross))
+                        if ((cross - start).Length < (shortestCrossedRay - start).Length)
+                            shortestCrossedRay = cross;
+
+                result.Add(shortestCrossedRay.ToPoint());
+                currentVector = currentVector.Turn(dAngle);
+            }
+
+            return result.ToArray();
         }
- 
+
         private static Rectangle GetViewRectangle(Explorer e)
         {
             var heightHalf = (int) (Math.Tan(ViewAngleHalfRad) * ViewingRange);
@@ -36,69 +54,36 @@ namespace TimeCollapse.Models
                 heightHalf * 2);
         }
 
-        public static Point[] GetFieldOfViewNonTrivial(this Explorer e, Game game, Vector start)
-        {
-            return Array.Empty<Point>();
-        }
-
         public static bool RayCross(Vector rayStart, Vector rayVector, (Vector, Vector) line, out Vector result)
         {
             result = new Vector(rayStart.X + rayVector.X, rayStart.Y + rayVector.Y);
 
             var (a, b, c) = FindTheLineClerics(line.Item1, line.Item2);
-
-            var v = rayVector.X;
-            var w = rayVector.Y;
-
-            var result1 = a * rayStart.X + b * rayStart.Y + c;
-            var result2 = a * (rayStart + rayVector).X + b * (rayStart + rayVector).Y + c;
-
-            if (result1 == 0 && result2 == 0)
-            {
-                Console.WriteLine("a");
-                return false;
-            }
-
-            if (a * v + b * w == 0)
-            {
-                Console.WriteLine("b");
-                return false;
-            }
+            var (v, w) = (rayVector.X, rayVector.Y);
+            if (a * v + b * w == 0) return false;
 
             var t = (-a * rayStart.X - b * rayStart.Y - c) / (a * v + b * w);
+            if (t < 0) return false;
 
-            if (t < 0)
-            {
-                Console.WriteLine("c");
-                return false;
-            }
-
-            var resultX = rayStart.X + v * t;
-            var resultY = rayStart.Y + w * t;
-
-            if (!PointOnLineSegment(new Vector(resultX, resultY), line) || !PointOnLineSegment(new Vector(resultX, resultY), (rayStart, rayStart+rayVector))) return false;
-
-            result = new Vector(resultX, resultY);
+            var (x, y) = (rayStart.X + v * t, rayStart.Y + w * t);
+            if (!PointOnLineSegment(new Vector(x, y), line) ||
+                !PointOnLineSegment(new Vector(x, y), (rayStart, rayStart + rayVector))) return false;
+            result = new Vector(x, y);
             return true;
+        }
+
+        public static bool PointOnLineSegment(Vector point, (Vector, Vector) line)
+        {
+            var (a, b, c) = FindTheLineClerics(line.Item1, line.Item2);
+            if (Math.Abs(a * point.X + b * point.Y + c) > 1e-9) return false;
+            var pointToStart = line.Item1 - point;
+            var pointToEnd = line.Item2 - point;
+            return pointToStart.X * pointToEnd.X + pointToStart.Y * pointToEnd.Y <= 0;
         }
 
         private static (double, double, double) FindTheLineClerics(Vector a, Vector b)
         {
             return (b.Y - a.Y, a.X - b.X, a.Y * b.X - a.X * b.Y);
-        }
-
-        public static bool PointOnLineSegment(Vector point, (Vector, Vector) line)
-        {
-            var x = point.X;
-            var y = point.Y;
-            var x1 = line.Item1.X;
-            var y1 = line.Item1.Y;
-            var x2 = line.Item2.X;
-            var y2 = line.Item2.Y;
-            var ab = Math.Sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
-            var ap = Math.Sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1));
-            var pb = Math.Sqrt((x2-x)*(x2-x)+(y2-y)*(y2-y));
-            return Math.Abs(ab - (ap + pb)) < 1e-9;
         }
     }
 }

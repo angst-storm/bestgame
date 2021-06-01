@@ -111,5 +111,10 @@ namespace TimeCollapse.Models
         {
             return clockwise ? new Vector(Y, -X) : new Vector(-Y, X);
         }
+
+        public Vector Turn(double angle)
+        {
+            return new(X * Math.Cos(angle) + Y * Math.Sin(angle), Y * Math.Cos(angle) - X * Math.Sin(angle));
+        }
     }
 }

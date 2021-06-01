@@ -24,7 +24,7 @@ namespace TimeCollapse.Models
         public bool OnFloor { get; private set; }
 
         public bool TurnedRight { get; private set; }
-        
+
         public bool Go { get; private set; }
 
         protected CharacterState Translate(Vector force)
@@ -63,10 +63,10 @@ namespace TimeCollapse.Models
             Collider = offsetCollider;
 
             OnFloor = game.Map.Blocks.Any(block => Collider.Bottom == block.Top &&
-                                                         (Collider.Left >= block.Left &&
-                                                          Collider.Left <= block.Right ||
-                                                          Collider.Right >= block.Left &&
-                                                          Collider.Right <= block.Right));
+                                                   (Collider.Left >= block.Left &&
+                                                    Collider.Left <= block.Right ||
+                                                    Collider.Right >= block.Left &&
+                                                    Collider.Right <= block.Right));
             TurnedRight = force.X switch
             {
                 > 0 => true,
@@ -84,10 +84,10 @@ namespace TimeCollapse.Models
             Collider = new Rectangle(position, Collider.Size);
             speed = new Vector(0, 0);
             OnFloor = game.Map.Blocks.Any(block => Collider.Bottom == block.Top &&
-                                                         (Collider.Left >= block.Left &&
-                                                          Collider.Left <= block.Right ||
-                                                          Collider.Right >= block.Left &&
-                                                          Collider.Right <= block.Right));
+                                                   (Collider.Left >= block.Left &&
+                                                    Collider.Left <= block.Right ||
+                                                    Collider.Right >= block.Left &&
+                                                    Collider.Right <= block.Right));
             Go = false;
             return new CharacterState(Collider, speed, OnFloor, TurnedRight, Go);
         }

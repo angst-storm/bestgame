@@ -108,7 +108,7 @@ namespace TimeCollapse.View
             g.DrawImage(portal, game.Map.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {
-                g.DrawPolygon(new Pen(Color.Goldenrod, 3), explorer.GetFieldOfView());
+                g.FillPolygon(new SolidBrush(Color.Goldenrod), explorer.GetFieldOfViewRayTracing(game));
                 g.DrawImage(GetCurrentSprite(explorer), explorer.Collider);
             }
         }
