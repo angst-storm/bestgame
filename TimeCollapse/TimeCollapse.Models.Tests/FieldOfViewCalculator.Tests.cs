@@ -14,7 +14,7 @@ namespace TimeCollapse.Models.Tests
         public void PointOnLineTest(double x, double y, bool on)
         {
             var line = (new Vector(1, 1), new Vector(7, 4));
-            Assert.AreEqual(on, FieldOfViewCalculator.PointOnLine(new Vector(x, y), line));
+            Assert.AreEqual(on, FieldOfViewCalculator.PointOnLineSegment(new Vector(x, y), line));
         }
 
         [TestCase(5, 9, 1, 5, true, 3, 7)]
@@ -28,8 +28,8 @@ namespace TimeCollapse.Models.Tests
         public void RayCrossTest(double x1, double y1, double x2, double y2, bool cross, double rx, double ry)
         {
             var section = (new Vector(x1, y1), new Vector(x2, y2));
-            var rayLocation = new Vector(1, 2);
-            var rayVector = new Vector(8, 8);
+            var rayLocation = new Vector(1, 9);
+            var rayVector = new Vector(8, -8);
             var crossResult = FieldOfViewCalculator.RayCross(rayLocation, rayVector, section, out var result);
             Assert.AreEqual(cross, crossResult);
             Assert.AreEqual(new Vector(rx, ry), result);

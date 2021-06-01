@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace TimeCollapse.Models
@@ -24,7 +25,7 @@ namespace TimeCollapse.Models
                 new Point(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Bottom)
             };
         }
-
+ 
         private static Rectangle GetViewRectangle(Explorer e)
         {
             var heightHalf = (int) (Math.Tan(ViewAngleHalfRad) * ViewingRange);
@@ -42,17 +43,62 @@ namespace TimeCollapse.Models
 
         public static bool RayCross(Vector rayStart, Vector rayVector, (Vector, Vector) line, out Vector result)
         {
-            throw new NotImplementedException();
+            result = new Vector(rayStart.X + rayVector.X, rayStart.Y + rayVector.Y);
+
+            var (a, b, c) = FindTheLineClerics(line.Item1, line.Item2);
+
+            var v = rayVector.X;
+            var w = rayVector.Y;
+
+            var result1 = a * rayStart.X + b * rayStart.Y + c;
+            var result2 = a * (rayStart + rayVector).X + b * (rayStart + rayVector).Y + c;
+
+            if (result1 == 0 && result2 == 0)
+            {
+                Console.WriteLine("a");
+                return false;
+            }
+
+            if (a * v + b * w == 0)
+            {
+                Console.WriteLine("b");
+                return false;
+            }
+
+            var t = (-a * rayStart.X - b * rayStart.Y - c) / (a * v + b * w);
+
+            if (t < 0)
+            {
+                Console.WriteLine("c");
+                return false;
+            }
+
+            var resultX = rayStart.X + v * t;
+            var resultY = rayStart.Y + w * t;
+
+            if (!PointOnLineSegment(new Vector(resultX, resultY), line) || !PointOnLineSegment(new Vector(resultX, resultY), (rayStart, rayStart+rayVector))) return false;
+
+            result = new Vector(resultX, resultY);
+            return true;
         }
 
         private static (double, double, double) FindTheLineClerics(Vector a, Vector b)
         {
-            return (b.Y - a.Y, b.X - a.X, a.X * b.Y - b.X * a.Y);
+            return (b.Y - a.Y, a.X - b.X, a.Y * b.X - a.X * b.Y);
         }
 
-        public static bool PointOnLine(Vector point, (Vector, Vector) line)
+        public static bool PointOnLineSegment(Vector point, (Vector, Vector) line)
         {
-            throw new NotImplementedException();
+            var x = point.X;
+            var y = point.Y;
+            var x1 = line.Item1.X;
+            var y1 = line.Item1.Y;
+            var x2 = line.Item2.X;
+            var y2 = line.Item2.Y;
+            var ab = Math.Sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+            var ap = Math.Sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1));
+            var pb = Math.Sqrt((x2-x)*(x2-x)+(y2-y)*(y2-y));
+            return Math.Abs(ab - (ap + pb)) < 1e-9;
         }
     }
 }
