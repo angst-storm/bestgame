@@ -20,6 +20,8 @@ namespace TimeCollapse.View
         private List<Bitmap> explorerRight;
         private List<Bitmap> explorerWalkLeft;
         private List<Bitmap> explorerWalkRight;
+        private List<Bitmap> portalAnimation;
+        private IEnumerator<Bitmap> portalEnumerator;
         private Game game;
         private IEnumerator<Map> levelsEnumerator;
         private Bitmap portal;
@@ -105,7 +107,12 @@ namespace TimeCollapse.View
             g.FillRectangles(new SolidBrush(Color.DarkSlateGray), game.Map.Blocks.ToArray());
             if (game.Map.TimeAnomalies.Count != 0)
                 g.FillRectangles(new SolidBrush(Color.OrangeRed), game.Map.TimeAnomalies.ToArray());
-            g.DrawImage(portal, game.Map.ActualStage.Target);
+            if (!portalEnumerator.MoveNext())
+            {
+                portalEnumerator = portalAnimation.GetEnumerator();
+                portalEnumerator.MoveNext();
+            }
+            g.DrawImage(portalEnumerator.Current ?? throw new Exception("Animation dont work"), game.Map.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {
                 g.FillPolygon(new SolidBrush(Color.Goldenrod), explorer.GetFieldOfViewRayTracing(game));
@@ -180,6 +187,10 @@ namespace TimeCollapse.View
 
             explorerJumpImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
             explorerJumpLeft = SplitImage(explorerJumpImage, new Size(16 * 3, 32 * 3), 1).ToList();
+
+            var portalAnimationImage = new Bitmap(Image.FromFile(@"Assets\PortalAnimation.png"));
+            portalAnimation = SplitImage(portalAnimationImage, new Size(16 * 3, 16 * 3), 5).ToList();
+            portalEnumerator = portalAnimation.GetEnumerator();
 
             portal = new Bitmap(Image.FromFile(@"Assets\Portal.png"));
 
