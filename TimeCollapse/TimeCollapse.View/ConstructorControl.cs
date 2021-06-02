@@ -88,7 +88,7 @@ namespace TimeCollapse.View
                 }
             }
 
-            Map.AllMaps.Add(new Map(name.Text, mapConstructor.Blocks,
+            Map.AllMaps.Add(new Map(name.Text, mapConstructor.Blocks, mapConstructor.TimeAnomalies,
                 StagesList.Select(cs => new Stage(cs.Spawn.Location, cs.Target))));
 
             var sb = new StringBuilder();
@@ -96,7 +96,8 @@ namespace TimeCollapse.View
             sb.Append(';');
             foreach (var block in mapConstructor.Blocks)
                 sb.Append($"{block.X}.{block.Y}.{block.Width}.{block.Height},");
-
+            foreach (var anomaly in mapConstructor.TimeAnomalies)
+                sb.Append($"{anomaly.X}.{anomaly.Y}.{anomaly.Width}.{anomaly.Height},");
             sb.Remove(sb.Length - 1, 1);
             sb.Append(';');
             foreach (var stage in StagesList.Select(cs => new Stage(cs.Spawn.Location, cs.Target)))
@@ -117,16 +118,20 @@ namespace TimeCollapse.View
             foreach (var map in maps)
             {
                 var tokens = map.Split(";");
-                var name = tokens[0];
+                var mapName = tokens[0];
                 var blocks = tokens[1].Split(",")
                     .Select(s => s.Split("."))
                     .Select(s => s.Select(int.Parse).ToArray())
                     .Select(s => new Rectangle(s[0], s[1], s[2], s[3]));
-                var stages = tokens[2].Split(",")
+                var anomaly = tokens[2].Split(",")
+                    .Select(s => s.Split("."))
+                    .Select(s => s.Select(int.Parse).ToArray())
+                    .Select(s => new Rectangle(s[0], s[1], s[2], s[3]));
+                var stages = tokens[3].Split(",")
                     .Select(s => s.Split("."))
                     .Select(s => s.Select(int.Parse).ToArray())
                     .Select(s => new Stage(new Point(s[0], s[1]), new Rectangle(s[2], s[3], s[4], s[5])));
-                Map.AllMaps.Add(new Map(name, blocks, stages));
+                Map.AllMaps.Add(new Map(mapName, blocks, anomaly, stages));
             }
         }
 
@@ -157,7 +162,7 @@ namespace TimeCollapse.View
                 Dock = DockStyle.Fill,
                 BackColor = Color.Azure
             };
-            Details.Items.AddRange(new object[] {"Блок", "Стартовый прямоугольник", "Целевой прямоугольник"});
+            Details.Items.AddRange(new object[] {"Блок", "Временные аномалии", "Стартовый прямоугольник", "Целевой прямоугольник"});
             Details.SelectedIndex = 0;
             table.Controls.Add(Details, 0, 0);
 

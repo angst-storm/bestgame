@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace TimeCollapse.Models
             new Rectangle(976, 352, 16, 176),
             new Rectangle(32, 336, 960, 16),
             new Rectangle(48, 432, 80, 16)
-        }, new[]
+        }, Array.Empty<Rectangle>(), new[]
         {
             new Stage(new Point(64, 640), new Rectangle(64, 366, 48, 64)),
             new Stage(new Point(480, 640), new Rectangle(64, 366, 48, 64)),
@@ -41,7 +42,7 @@ namespace TimeCollapse.Models
             new Rectangle(432, 656, 32, 16),
             new Rectangle(432, 560, 192, 16),
             new Rectangle(608, 576, 16, 80)
-        }, new[]
+        }, Array.Empty<Rectangle>(), new[]
         {
             new Stage(new Point(448, 784), new Rectangle(1312, 688, 48, 48)),
             new Stage(new Point(1232, 688), new Rectangle(544, 592, 48, 48))
@@ -58,11 +59,12 @@ namespace TimeCollapse.Models
                 AllMaps.Add(map);
         }
 
-        public Map(string name, IEnumerable<Rectangle> blocks, IEnumerable<Stage> stages)
+        public Map(string name, IEnumerable<Rectangle> blocks, IEnumerable<Rectangle> timeAnomalies,
+            IEnumerable<Stage> stages)
         {
             Name = name;
             Blocks = blocks.ToHashSet();
-            TimeAnomalies = new HashSet<Rectangle>();
+            TimeAnomalies = timeAnomalies.ToHashSet();
             this.stages = stages.ToList();
             stagesSwitcher = this.stages.GetEnumerator();
             if (stagesSwitcher.MoveNext())

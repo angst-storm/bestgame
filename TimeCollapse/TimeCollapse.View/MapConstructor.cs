@@ -9,7 +9,6 @@ namespace TimeCollapse.View
 {
     public sealed class MapConstructor : UserControl
     {
-        public HashSet<Rectangle> Blocks { get; }= new();
         private readonly ConstructorControl constructorControl;
         private readonly List<(Rectangle, Rectangle)> stages = new();
         private bool draw;
@@ -29,10 +28,14 @@ namespace TimeCollapse.View
             UpdateStyles();
         }
 
+        public HashSet<Rectangle> Blocks { get; } = new();
+        public HashSet<Rectangle> TimeAnomalies { get; } = new();
+
         private ConstructorDetail ActiveDetail =>
             constructorControl.Details.SelectedItem.ToString() switch
             {
                 "Блок" => ConstructorDetail.Block,
+                "Временные аномалии" => ConstructorDetail.TimeAnomaly,
                 "Стартовый прямоугольник" => ConstructorDetail.StartRectangle,
                 "Целевой прямоугольник" => ConstructorDetail.TargetRectangle,
                 _ => throw new InvalidOperationException()
@@ -81,6 +84,7 @@ namespace TimeCollapse.View
         {
             var g = e.Graphics;
             if (Blocks.Count > 0) g.FillRectangles(new SolidBrush(Color.DimGray), Blocks.ToArray());
+            if (TimeAnomalies.Count > 0) g.FillRectangles(new SolidBrush(Color.BlueViolet), TimeAnomalies.ToArray());
             if (ActiveStage.Spawn != Rectangle.Empty)
                 g.FillRectangle(new SolidBrush(Color.Goldenrod), ActiveStage.Spawn);
             if (ActiveStage.Target != Rectangle.Empty)
@@ -94,6 +98,9 @@ namespace TimeCollapse.View
             {
                 case ConstructorDetail.Block:
                     Blocks.Add(drawableRectangle);
+                    break;
+                case ConstructorDetail.TimeAnomaly:
+                    TimeAnomalies.Add(drawableRectangle);
                     break;
                 case ConstructorDetail.StartRectangle when drawableRectangle.Size == Explorer.DefaultColliderSize:
                     ActiveStage.Spawn = drawableRectangle;
@@ -118,6 +125,9 @@ namespace TimeCollapse.View
                 case ConstructorDetail.Block:
                     Blocks.Remove(drawableRectangle);
                     break;
+                case ConstructorDetail.TimeAnomaly:
+                    TimeAnomalies.Remove(drawableRectangle);
+                    break;
                 case ConstructorDetail.StartRectangle:
                     ActiveStage.Spawn = Rectangle.Empty;
                     break;
@@ -141,6 +151,11 @@ namespace TimeCollapse.View
                     rect = Blocks.First(b => b.Contains(point));
                     return true;
                 case ConstructorDetail.Block:
+                    return false;
+                case ConstructorDetail.TimeAnomaly when TimeAnomalies.Any(b => b.Contains(point)):
+                    rect = TimeAnomalies.First(b => b.Contains(point));
+                    return true;
+                case ConstructorDetail.TimeAnomaly:
                     return false;
                 case ConstructorDetail.StartRectangle when ActiveStage.Spawn.Contains(point):
                     rect = ActiveStage.Spawn;
