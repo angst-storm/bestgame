@@ -206,10 +206,9 @@ namespace TimeCollapse.View
                 Enabled = false,
                 BackColor = Color.FromArgb(18, 62, 64)
             };
-            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
-            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
-            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
-            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 33));
+            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 33));
+            pauseTable.RowStyles.Add(new RowStyle(SizeType.Percent, 33));
             pauseTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Resume", pauseTable.Size.Height / 20, ResumeGame), 0,
                 0);
@@ -220,11 +219,8 @@ namespace TimeCollapse.View
                     mainForm.ToMainMenu(this);
                 }),
                 0, 1);
-            pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Select Map", pauseTable.Size.Height / 20, () => { }),
-                0,
-                2);
             pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Exit", pauseTable.Size.Height / 20, Application.Exit),
-                0, 3);
+                0, 2);
             pauseTable.KeyDown += (sender, args) =>
             {
                 if (args.KeyCode == Keys.Escape) ResumeGame();
