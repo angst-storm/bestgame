@@ -59,6 +59,10 @@
       <Resource Include="Assets\PortalAnimation.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Resource>
+      <None Remove="Assets\TimeAmomaly.png" />
+      <Resource Include="Assets\TimeAnomaly.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
     </ItemGroup>
 
     <ItemGroup>

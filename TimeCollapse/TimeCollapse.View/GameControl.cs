@@ -22,9 +22,10 @@ namespace TimeCollapse.View
         private List<Bitmap> explorerWalkRight;
         private List<Bitmap> portalAnimation;
         private IEnumerator<Bitmap> portalEnumerator;
+        private List<Bitmap> timeAnomalyAnimation;
+        private IEnumerator<Bitmap> timeAnomalyEnumerator;
         private Game game;
         private IEnumerator<Map> levelsEnumerator;
-        private Bitmap portal;
         private int timerTick;
 
         public GameControl(MainForm form)
@@ -105,14 +106,21 @@ namespace TimeCollapse.View
         {
             var g = e.Graphics;
             g.FillRectangles(new SolidBrush(Color.DarkSlateGray), game.Map.Blocks.ToArray());
-            if (game.Map.TimeAnomalies.Count != 0)
-                g.FillRectangles(new SolidBrush(Color.OrangeRed), game.Map.TimeAnomalies.ToArray());
+            if (!timeAnomalyEnumerator.MoveNext())
+            {
+                timeAnomalyEnumerator = timeAnomalyAnimation.GetEnumerator();
+                timeAnomalyEnumerator.MoveNext();
+            }
+
+            var currentTimeAnomaly = timeAnomalyEnumerator.Current;
+            foreach (var anomaly in game.Map.TimeAnomalies)
+                g.DrawImage(currentTimeAnomaly ?? throw new Exception("Animation dont work"), anomaly);
             if (!portalEnumerator.MoveNext())
             {
                 portalEnumerator = portalAnimation.GetEnumerator();
                 portalEnumerator.MoveNext();
             }
-            g.DrawImage(portalEnumerator.Current ?? throw new Exception("Animation dont work"), game.Map.ActualStage.Target);
+            g.DrawImage(portalEnumerator.Current ?? throw new InvalidOperationException(), game.Map.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {
                 g.FillPolygon(new SolidBrush(Color.Goldenrod), explorer.GetFieldOfViewRayTracing(game));
@@ -192,7 +200,9 @@ namespace TimeCollapse.View
             portalAnimation = SplitImage(portalAnimationImage, new Size(16 * 3, 16 * 3), 5).ToList();
             portalEnumerator = portalAnimation.GetEnumerator();
 
-            portal = new Bitmap(Image.FromFile(@"Assets\Portal.png"));
+            var timeAnomalyImage = new Bitmap(Image.FromFile(@"Assets\TimeAnomaly.png"));
+            timeAnomalyAnimation = SplitImage(timeAnomalyImage, new Size(20 * 3, 20 * 3), 3).ToList();
+            timeAnomalyEnumerator = timeAnomalyAnimation.GetEnumerator();
 
             background = new Bitmap(Image.FromFile(@"Assets\Background.png"));
         }
