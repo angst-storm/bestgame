@@ -3,6 +3,7 @@
     public enum ConstructorDetail
     {
         Block,
+        TimeAnomaly,
         StartRectangle,
         TargetRectangle
     }

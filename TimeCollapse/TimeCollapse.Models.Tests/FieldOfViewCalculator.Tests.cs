@@ -11,7 +11,7 @@ namespace TimeCollapse.Models.Tests
         [TestCase(3, 3, false)]
         [TestCase(5, 1, false)]
         [TestCase(6, 1, false)]
-        public void PointOnLineTest(double x, double y, bool on)
+        public void PointOnLineSegmentTest(double x, double y, bool on)
         {
             var line = (new Vector(1, 1), new Vector(7, 4));
             Assert.AreEqual(on, FieldOfViewCalculator.PointOnLineSegment(new Vector(x, y), line));

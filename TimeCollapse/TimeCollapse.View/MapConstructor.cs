@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using TimeCollapse.Models;
 
@@ -10,7 +9,7 @@ namespace TimeCollapse.View
 {
     public sealed class MapConstructor : UserControl
     {
-        private readonly HashSet<Rectangle> blocks = new();
+        public readonly HashSet<Rectangle> Blocks = new();
         private readonly ConstructorControl constructorControl;
         private readonly List<(Rectangle, Rectangle)> stages = new();
         private bool draw;
@@ -22,10 +21,7 @@ namespace TimeCollapse.View
             this.constructorControl = constructorControl;
             BackgroundImage = BackGroundDots();
 
-            constructorControl.RefreshButton.Click += (sender, args) => CompileMap();
-
-            constructorControl.Stages.SelectedIndexChanged += (sender, args) => ChangeStage();
-            ChangeStage();
+            constructorControl.Stages.SelectedIndexChanged += (sender, args) => Invalidate();
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.AllPaintingInWmPaint |
@@ -42,7 +38,7 @@ namespace TimeCollapse.View
                 _ => throw new InvalidOperationException()
             };
 
-        private int ActiveStage => constructorControl.Stages.SelectedIndex;
+        private ConstructorStage ActiveStage => constructorControl.StagesList[constructorControl.Stages.SelectedIndex];
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
@@ -84,11 +80,11 @@ namespace TimeCollapse.View
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;
-            if (blocks.Count > 0) g.FillRectangles(new SolidBrush(Color.DimGray), blocks.ToArray());
-            if (stages[ActiveStage].Item1 != Rectangle.Empty)
-                g.FillRectangle(new SolidBrush(Color.Goldenrod), stages[ActiveStage].Item1);
-            if (stages[ActiveStage].Item2 != Rectangle.Empty)
-                g.FillRectangle(new SolidBrush(Color.DarkGreen), stages[ActiveStage].Item2);
+            if (Blocks.Count > 0) g.FillRectangles(new SolidBrush(Color.DimGray), Blocks.ToArray());
+            if (ActiveStage.Spawn != Rectangle.Empty)
+                g.FillRectangle(new SolidBrush(Color.Goldenrod), ActiveStage.Spawn);
+            if (ActiveStage.Target != Rectangle.Empty)
+                g.FillRectangle(new SolidBrush(Color.DarkGreen), ActiveStage.Target);
             if (!drawableRectangle.IsEmpty) g.FillRectangle(new SolidBrush(Color.Firebrick), drawableRectangle);
         }
 
@@ -97,18 +93,18 @@ namespace TimeCollapse.View
             switch (ActiveDetail)
             {
                 case ConstructorDetail.Block:
-                    blocks.Add(drawableRectangle);
+                    Blocks.Add(drawableRectangle);
                     break;
                 case ConstructorDetail.StartRectangle when drawableRectangle.Size == Explorer.DefaultColliderSize:
-                    stages[ActiveStage] = (drawableRectangle, stages[ActiveStage].Item2);
+                    ActiveStage.Spawn = drawableRectangle;
                     break;
                 case ConstructorDetail.StartRectangle:
-                    PrintException(
+                    constructorControl.PrintException(
                         $"Стартовый прямоугольник должен быть размера {Explorer.DefaultColliderSize.Width}x{Explorer.DefaultColliderSize.Height}");
                     drawableRectangle = Rectangle.Empty;
                     break;
                 case ConstructorDetail.TargetRectangle:
-                    stages[ActiveStage] = (stages[ActiveStage].Item1, drawableRectangle);
+                    ActiveStage.Target = drawableRectangle;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -120,13 +116,13 @@ namespace TimeCollapse.View
             switch (ActiveDetail)
             {
                 case ConstructorDetail.Block:
-                    blocks.Remove(drawableRectangle);
+                    Blocks.Remove(drawableRectangle);
                     break;
                 case ConstructorDetail.StartRectangle:
-                    stages[ActiveStage] = (Rectangle.Empty, stages[ActiveStage].Item2);
+                    ActiveStage.Spawn = Rectangle.Empty;
                     break;
                 case ConstructorDetail.TargetRectangle:
-                    stages[ActiveStage] = (stages[ActiveStage].Item1, Rectangle.Empty);
+                    ActiveStage.Target = Rectangle.Empty;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -141,72 +137,24 @@ namespace TimeCollapse.View
 
             switch (ActiveDetail)
             {
-                case ConstructorDetail.Block when blocks.Any(b => b.Contains(point)):
-                    rect = blocks.First(b => b.Contains(point));
+                case ConstructorDetail.Block when Blocks.Any(b => b.Contains(point)):
+                    rect = Blocks.First(b => b.Contains(point));
                     return true;
                 case ConstructorDetail.Block:
                     return false;
-                case ConstructorDetail.StartRectangle when stages[ActiveStage].Item1.Contains(point):
-                    rect = stages[ActiveStage].Item1;
+                case ConstructorDetail.StartRectangle when ActiveStage.Spawn.Contains(point):
+                    rect = ActiveStage.Spawn;
                     return true;
                 case ConstructorDetail.StartRectangle:
                     return false;
-                case ConstructorDetail.TargetRectangle when stages[ActiveStage].Item2.Contains(point):
-                    rect = stages[ActiveStage].Item2;
+                case ConstructorDetail.TargetRectangle when ActiveStage.Target.Contains(point):
+                    rect = ActiveStage.Target;
                     return true;
                 case ConstructorDetail.TargetRectangle:
                     return false;
                 default:
                     throw new InvalidOperationException();
             }
-        }
-
-        private void CompileMap()
-        {
-            var strBuilder = new StringBuilder();
-            strBuilder.AppendLine("new Map(new[]");
-            strBuilder.AppendLine("{");
-            foreach (var block in blocks)
-                strBuilder.AppendLine($"    new Rectangle({block.X}, {block.Y}, {block.Width}, {block.Height}),");
-            strBuilder.AppendLine("}, new[]");
-            strBuilder.AppendLine("{");
-            foreach (var stage in stages)
-            {
-                if (stage.Item1 == Rectangle.Empty)
-                {
-                    PrintException($"На стадии {stages.IndexOf(stage)} не задан стартовый прямоугольник");
-                    return;
-                }
-
-                if (stage.Item2 == Rectangle.Empty)
-                {
-                    PrintException($"На стадии {stages.IndexOf(stage)} не задан целевой прямоугольник");
-                    return;
-                }
-
-                strBuilder.AppendLine(
-                    $"    new Stage(new Point({stage.Item1.X}, {stage.Item1.Y})," +
-                    $" new Rectangle({stage.Item2.X}, {stage.Item2.Y}, {stage.Item2.Width}, {stage.Item2.Height})),");
-            }
-
-            strBuilder.AppendLine("});");
-            constructorControl.ResultText.BackColor = constructorControl.ResultText.BackColor;
-            constructorControl.ResultText.ForeColor = Color.Black;
-            constructorControl.ResultText.Text = strBuilder.ToString();
-        }
-
-        private void PrintException(string message)
-        {
-            constructorControl.ResultText.BackColor = constructorControl.ResultText.BackColor;
-            constructorControl.ResultText.ForeColor = Color.Red;
-            constructorControl.ResultText.Text = message;
-        }
-
-        private void ChangeStage()
-        {
-            for (var i = 0; i < constructorControl.Stages.Items.Count - stages.Count; i++)
-                stages.Add((Rectangle.Empty, Rectangle.Empty));
-            Invalidate();
         }
 
         private static Bitmap BackGroundDots()

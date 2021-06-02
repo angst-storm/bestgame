@@ -7,7 +7,7 @@ namespace TimeCollapse.Models
 {
     public class Map
     {
-        public static readonly Map TestMap = new("Тестовая карта", new[]
+        private static readonly Map TestMap = new("Тестовая карта", new[]
         {
             new Rectangle(32, 720, 960, 16),
             new Rectangle(32, 544, 16, 176),
@@ -58,7 +58,7 @@ namespace TimeCollapse.Models
                 AllMaps.Add(map);
         }
 
-        private Map(string name, IEnumerable<Rectangle> blocks, IEnumerable<Stage> stages)
+        public Map(string name, IEnumerable<Rectangle> blocks, IEnumerable<Stage> stages)
         {
             Name = name;
             Blocks = blocks.ToHashSet();

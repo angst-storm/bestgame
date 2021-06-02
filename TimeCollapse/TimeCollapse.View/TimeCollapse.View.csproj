@@ -60,4 +60,8 @@
       <None Remove="Assets\ExploWalk x2.png" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="UserMaps.txt" />
+    </ItemGroup>
+
 </Project>

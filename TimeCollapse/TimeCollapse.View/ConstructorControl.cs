@@ -1,11 +1,23 @@
-﻿using System.Drawing;
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
+using TimeCollapse.Models;
 
 namespace TimeCollapse.View
 {
     public sealed class ConstructorControl : UserControl
     {
         private readonly MainForm mainForm;
+        private readonly MapConstructor mapConstructor;
+        public ComboBox Details;
+        private TextBox messages;
+        private TextBox name;
+        public ComboBox Stages;
+        public BindingList<ConstructorStage> StagesList;
 
         public ConstructorControl(MainForm form)
         {
@@ -13,17 +25,20 @@ namespace TimeCollapse.View
             ClientSize = mainForm.Size;
             BackColor = Color.FromArgb(18, 62, 64);
 
+            RecoverCustomMaps();
+
             var table = new TableLayoutPanel
             {
                 Location = new Point(),
                 Size = ClientSize
             };
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 90));
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 108));
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, ClientSize.Height - 108));
             table.Controls.Add(InitializeControlTable(), 0, 0);
 
+            mapConstructor = new MapConstructor(this) {Dock = DockStyle.Fill};
             table.Controls.Add(Screen.PrimaryScreen.Bounds.Size == new Size(1920, 1080)
-                ? new MapConstructor(this) {Dock = DockStyle.Fill}
+                ? mapConstructor
                 : new Label
                 {
                     Text =
@@ -35,81 +50,138 @@ namespace TimeCollapse.View
             Controls.Add(table);
         }
 
-        public ComboBox Details { get; private set; }
-        public ComboBox Stages { get; private set; }
-        public Button RefreshButton { get; private set; }
-        public Button Increment { get; private set; }
-        public Button Decrement { get; private set; }
-        public TextBox ResultText { get; private set; }
+        public void PrintException(string message)
+        {
+            messages.BackColor = Color.Azure;
+            messages.ForeColor = Color.Red;
+            messages.Text = message;
+        }
+
+        private void PrintGoodMessage(string message)
+        {
+            messages.BackColor = Color.Azure;
+            messages.ForeColor = Color.Green;
+            messages.Text = message;
+        }
+
+        private void CompileMap()
+        {
+            if (Map.AllMaps.Any(m => string.Compare(m.Name, name.Text, StringComparison.Ordinal) == 0))
+            {
+                PrintException("Карта с таким названием уже есть в коллекции");
+                return;
+            }
+
+            foreach (var stage in StagesList)
+            {
+                if (stage.Spawn == Rectangle.Empty)
+                {
+                    PrintException($"На стадии {stage.Number} не задан стартовый прямоугольник");
+                    return;
+                }
+
+                if (stage.Target == Rectangle.Empty)
+                {
+                    PrintException($"На стадии {stage.Number} не задан целевой прямоугольник");
+                    return;
+                }
+            }
+
+            Map.AllMaps.Add(new Map(name.Text, mapConstructor.Blocks,
+                StagesList.Select(cs => new Stage(cs.Spawn.Location, cs.Target))));
+
+            var sb = new StringBuilder();
+            sb.Append(name.Text);
+            sb.Append(';');
+            foreach (var block in mapConstructor.Blocks)
+                sb.Append($"{block.X}.{block.Y}.{block.Width}.{block.Height},");
+
+            sb.Remove(sb.Length - 1, 1);
+            sb.Append(';');
+            foreach (var stage in StagesList.Select(cs => new Stage(cs.Spawn.Location, cs.Target)))
+                sb.Append(
+                    $"{stage.Spawn.X}.{stage.Spawn.Y}.{stage.Target.X}.{stage.Target.Y}.{stage.Target.Width}.{stage.Target.Height},");
+            sb.Remove(sb.Length - 1, 1);
+
+            var sw = File.AppendText(@"UserMaps.txt");
+            sw.WriteLine(sb.ToString());
+            sw.Close();
+
+            PrintGoodMessage($"Новая карта \"{name.Text}\" создана");
+        }
+
+        private void RecoverCustomMaps()
+        {
+            var maps = File.ReadLines(@"UserMaps.txt");
+            foreach (var map in maps)
+            {
+                var tokens = map.Split(";");
+                var name = tokens[0];
+                var blocks = tokens[1].Split(",")
+                    .Select(s => s.Split("."))
+                    .Select(s => s.Select(int.Parse).ToArray())
+                    .Select(s => new Rectangle(s[0], s[1], s[2], s[3]));
+                var stages = tokens[2].Split(",")
+                    .Select(s => s.Split("."))
+                    .Select(s => s.Select(int.Parse).ToArray())
+                    .Select(s => new Stage(new Point(s[0], s[1]), new Rectangle(s[2], s[3], s[4], s[5])));
+                Map.AllMaps.Add(new Map(name, blocks, stages));
+            }
+        }
 
         private TableLayoutPanel InitializeControlTable()
         {
             var table = new TableLayoutPanel {Dock = DockStyle.Fill};
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
-
-            table.Controls.Add(ExitButton(), 0, 0);
-
-            table.Controls.Add(DetailsTable(), 1, 0);
-
-            table.Controls.Add(StagesTable(), 2, 0);
-
-            table.Controls.Add(new Panel(), 3, 0);
-
-            table.Controls.Add(TextOperationsTable(), 4, 0);
-
+            table.Controls.Add(DetailsTable(), 0, 0);
+            table.Controls.Add(StagesTable(), 1, 0);
+            table.Controls.Add(CurrentMap(), 2, 0);
+            table.Controls.Add(SavedMaps(), 3, 0);
+            table.Controls.Add(ExitButton(), 4, 0);
             return table;
-        }
-
-        private Button ExitButton()
-        {
-            var exitButton = new Button
-            {
-                Text = @"Назад",
-                BackColor = Color.Azure,
-                Dock = DockStyle.Fill
-            };
-            exitButton.Click += (sender, args) => mainForm.ToMainMenu(this);
-            return exitButton;
         }
 
         private GroupBox DetailsTable()
         {
             var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Элементы", ForeColor = Color.Azure};
-
             var table = new TableLayoutPanel {Dock = DockStyle.Fill};
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-            table.Controls.Add(new Panel(), 0, 0);
-            Details = new ComboBox {Dock = DockStyle.Fill, BackColor = Color.Azure};
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            Details = new ComboBox
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.Azure
+            };
             Details.Items.AddRange(new object[] {"Блок", "Стартовый прямоугольник", "Целевой прямоугольник"});
             Details.SelectedIndex = 0;
             table.Controls.Add(Details, 0, 0);
 
             group.Controls.Add(table);
-
             return group;
         }
 
         private GroupBox StagesTable()
         {
             var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Стадии", ForeColor = Color.Azure};
-
             var table = new TableLayoutPanel {Dock = DockStyle.Fill};
+
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
-            Stages = new ComboBox {Dock = DockStyle.Fill, BackColor = Color.Azure};
-            Stages.Items.Add(0);
-            Stages.SelectedIndex = 0;
+            StagesList = new BindingList<ConstructorStage> {new(0)};
+            Stages = new ComboBox
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.Azure,
+                DataSource = StagesList,
+                DisplayMember = "Number"
+            };
             table.Controls.Add(Stages, 0, 0);
 
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Stages.Size.Height));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Stages.Size.Height));
-
-            Decrement = new Button
+            var decrement = new Button
             {
                 Size = new Size(Stages.Size.Height, Stages.Size.Height),
                 Text = @"-",
@@ -117,15 +189,15 @@ namespace TimeCollapse.View
                 ForeColor = Color.Black,
                 BackColor = Color.Azure
             };
-            Decrement.Click += (sender, args) =>
+            decrement.Click += (sender, args) =>
             {
-                if (Stages.Items.Count > 1)
-                    Stages.Items.RemoveAt(Stages.Items.Count - 1);
-                Stages.SelectedIndex = Stages.Items.Count - 1;
+                if (StagesList.Count > 1)
+                    StagesList.RemoveAt(StagesList.Count - 1);
             };
-            table.Controls.Add(Decrement, 1, 0);
+            table.Controls.Add(decrement, 1, 0);
 
-            Increment = new Button
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Stages.Size.Height));
+            var increment = new Button
             {
                 Size = new Size(Stages.Size.Height, Stages.Size.Height),
                 Text = @"+",
@@ -133,59 +205,107 @@ namespace TimeCollapse.View
                 ForeColor = Color.Black,
                 BackColor = Color.Azure
             };
-            Increment.Click += (sender, args) =>
+            increment.Click += (sender, args) =>
             {
-                Stages.Items.Add(Stages.Items.Count);
-                Stages.SelectedIndex = Stages.Items.Count - 1;
+                StagesList.Add(new ConstructorStage(StagesList.Count));
+                Stages.SelectedIndex = StagesList.Count - 1;
             };
-            table.Controls.Add(Increment, 2, 0);
+            table.Controls.Add(increment, 2, 0);
 
             group.Controls.Add(table);
-
             return group;
         }
 
-        private TableLayoutPanel TextOperationsTable()
+        private GroupBox CurrentMap()
         {
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Текущая карта", ForeColor = Color.Azure};
             var table = new TableLayoutPanel {Dock = DockStyle.Fill};
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
-            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
 
-            ResultText = new TextBox
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            name = new TextBox
             {
                 Dock = DockStyle.Fill,
-                Multiline = true,
-                ScrollBars = ScrollBars.Vertical,
-                ReadOnly = true
+                Text = "Название",
+                BackColor = Color.Azure
             };
+            table.Controls.Add(name, 0, 0);
 
-            table.Controls.Add(ResultText, 1, 0);
-
-            var buttonsTable = new TableLayoutPanel {Dock = DockStyle.Fill, Margin = new Padding(0)};
-            buttonsTable.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-            buttonsTable.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-
-            RefreshButton = new Button
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            var save = new Button
             {
                 Dock = DockStyle.Fill,
+                Text = "Сохранить",
+                ForeColor = Color.Black,
+                BackColor = Color.Azure
+            };
+            save.Click += (sender, args) => CompileMap();
+            table.Controls.Add(save, 0, 1);
+
+            group.Controls.Add(table);
+            return group;
+        }
+
+        private GroupBox SavedMaps()
+        {
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Сохраненные карты", ForeColor = Color.Azure};
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill};
+
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            var open = new Button
+            {
+                Dock = DockStyle.Fill,
+                Text = "Открыть",
                 ForeColor = Color.Black,
                 BackColor = Color.Azure,
-                Text = @"Обновить"
+                Enabled = false
             };
-            buttonsTable.Controls.Add(RefreshButton, 0, 0);
+            table.Controls.Add(open, 0, 0);
 
-            var copyButton = new Button
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            var delete = new Button
             {
                 Dock = DockStyle.Fill,
+                Text = "Удалить",
                 ForeColor = Color.Black,
                 BackColor = Color.Azure,
-                Text = @"Скопировать"
+                Enabled = false
             };
-            copyButton.Click += (sender, args) => Clipboard.SetText(ResultText.Text);
-            buttonsTable.Controls.Add(copyButton, 0, 1);
+            table.Controls.Add(delete, 0, 1);
 
-            table.Controls.Add(buttonsTable, 0, 0);
+            group.Controls.Add(table);
+            return group;
+        }
 
+        private TableLayoutPanel ExitButton()
+        {
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill, Margin = Padding.Empty};
+
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 60));
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Сообщения", ForeColor = Color.Azure};
+            messages = new TextBox
+            {
+                Dock = DockStyle.Fill,
+                ReadOnly = true,
+                Text = ""
+            };
+            group.Controls.Add(messages);
+            table.Controls.Add(group, 0, 0);
+
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
+            var exitTable = new TableLayoutPanel {Dock = DockStyle.Fill};
+            exitTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
+            exitTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
+            exitTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
+            var exitButton = new Button
+            {
+                Text = @"Назад",
+                BackColor = Color.Azure,
+                Dock = DockStyle.Fill
+            };
+            exitButton.Click += (sender, args) => mainForm.ToMainMenu(this);
+            exitTable.Controls.Add(exitButton, 2, 0);
+
+            table.Controls.Add(exitTable, 0, 1);
             return table;
         }
     }
