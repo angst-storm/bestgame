@@ -96,6 +96,8 @@ namespace TimeCollapse.View
             sb.Append(';');
             foreach (var block in mapConstructor.Blocks)
                 sb.Append($"{block.X}.{block.Y}.{block.Width}.{block.Height},");
+            sb.Remove(sb.Length - 1, 1);
+            sb.Append(';');
             foreach (var anomaly in mapConstructor.TimeAnomalies)
                 sb.Append($"{anomaly.X}.{anomaly.Y}.{anomaly.Width}.{anomaly.Height},");
             sb.Remove(sb.Length - 1, 1);
@@ -162,7 +164,8 @@ namespace TimeCollapse.View
                 Dock = DockStyle.Fill,
                 BackColor = Color.Azure
             };
-            Details.Items.AddRange(new object[] {"Блок", "Временные аномалии", "Стартовый прямоугольник", "Целевой прямоугольник"});
+            Details.Items.AddRange(new object[]
+                {"Блок", "Временные аномалии", "Стартовый прямоугольник", "Целевой прямоугольник"});
             Details.SelectedIndex = 0;
             table.Controls.Add(Details, 0, 0);
 
