@@ -214,7 +214,11 @@ namespace TimeCollapse.View
             pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Resume", pauseTable.Size.Height / 20, ResumeGame), 0,
                 0);
             pauseTable.Controls.Add(
-                MenuControl.MyDefaultButton(@"Main Menu", pauseTable.Size.Height / 20, () => mainForm.ToMainMenu(this)),
+                MenuControl.MyDefaultButton(@"Main Menu", pauseTable.Size.Height / 20, () =>
+                {
+                    game.Map.ResetMap();
+                    mainForm.ToMainMenu(this);
+                }),
                 0, 1);
             pauseTable.Controls.Add(MenuControl.MyDefaultButton(@"Select Map", pauseTable.Size.Height / 20, () => { }),
                 0,

@@ -90,22 +90,34 @@ namespace TimeCollapse.Models
         {
             var viewRect = GetViewRectangle(e);
             if (!viewRect.Contains(point.ToPoint())) return false;
-            var start = new Vector(e.TurnedRight ? viewRect.Left : viewRect.Right,
+
+            return SectorContains(point, viewRect, e.TurnedRight) &&
+                   DontCross(point, viewRect, e.TurnedRight, game.Map.Blocks);
+        }
+
+        public static bool SectorContains(Vector point, Rectangle viewRect, bool right)
+        {
+            var start = new Vector(right ? viewRect.Left : viewRect.Right,
                 viewRect.Top + viewRect.Size.Height / 2);
-            var comparativeVector = new Vector(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Top) - start;
+            var comparativeVector = new Vector(right ? viewRect.Right : viewRect.Left, viewRect.Top) - start;
             var ray = point - start;
-            if (Math.Atan2(Math.Abs(ray.Y), Math.Abs(ray.X)) > Math.Atan2(Math.Abs(comparativeVector.Y), Math.Abs(comparativeVector.X)))
-                return false;
-            var linesInSight = game.Map.Blocks.Where(b => b.IntersectsWith(viewRect)).SelectMany(b => new[]
+            return !(Math.Atan2(Math.Abs(ray.Y), Math.Abs(ray.X)) >
+                     Math.Atan2(Math.Abs(comparativeVector.Y), Math.Abs(comparativeVector.X)));
+        }
+
+        public static bool DontCross(Vector point, Rectangle viewRect, bool right, IEnumerable<Rectangle> colliders)
+        {
+            var linesInSight = colliders.Where(b => b.IntersectsWith(viewRect)).SelectMany(b => new[]
             {
                 (new Vector(b.Left, b.Top), new Vector(b.Right, b.Top)),
                 (new Vector(b.Left, b.Bottom), new Vector(b.Right, b.Bottom)),
                 (new Vector(b.Left, b.Top), new Vector(b.Left, b.Bottom)),
                 (new Vector(b.Right, b.Top), new Vector(b.Right, b.Bottom))
             }).ToList();
+            var start = new Vector(right ? viewRect.Left : viewRect.Right,
+                viewRect.Top + viewRect.Size.Height / 2);
+            var ray = point - start;
             return !linesInSight.Any(l => RayCross(start, ray, l, out _));
         }
-        
-        
     }
 }

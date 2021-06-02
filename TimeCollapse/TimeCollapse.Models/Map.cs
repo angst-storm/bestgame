@@ -85,14 +85,19 @@ namespace TimeCollapse.Models
         {
             if (!stagesSwitcher.MoveNext())
             {
-                stagesSwitcher = stages.GetEnumerator();
-                stagesSwitcher.MoveNext();
-                ActualStage = stagesSwitcher.Current;
+                ResetMap();
                 return false;
             }
 
             ActualStage = stagesSwitcher.Current;
             return true;
+        }
+
+        public void ResetMap()
+        {
+            stagesSwitcher = stages.GetEnumerator();
+            stagesSwitcher.MoveNext();
+            ActualStage = stagesSwitcher.Current;
         }
     }
 }

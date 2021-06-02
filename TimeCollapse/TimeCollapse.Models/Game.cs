@@ -23,6 +23,15 @@ namespace TimeCollapse.Models
         public IEnumerable<Explorer> AllExplorers =>
             explorersFromPast.Except(removedExplorers).Concat(new[] {PresentExplorer});
 
+        public void Update(int tick)
+        {
+            foreach (var explorer in AllExplorers)
+                explorer.Move(tick - tickDiff);
+            PortalControl(tick);
+            TimeAnomalyControl();
+            FieldOfViewIntersectControl();
+        }
+
         private void PortalControl(int tick)
         {
             if (PresentExplorer.Collider.IntersectsWith(PresentExplorer.Target))
@@ -30,10 +39,7 @@ namespace TimeCollapse.Models
                 if (Map.TrySwitchStage())
                 {
                     explorersFromPast.Add(PresentExplorer);
-                    removedExplorers.Clear();
-                    foreach (var explorer in explorersFromPast)
-                        explorer.Repeat();
-                    PresentExplorer = new Explorer(this, Map.ActualStage);
+                    ResetStage();
                 }
                 else
                 {
@@ -47,19 +53,32 @@ namespace TimeCollapse.Models
             tickDiff = tick + 1;
         }
 
-        public void Update(int tick)
+        private void TimeAnomalyControl()
         {
-            foreach (var explorer in AllExplorers)
-                explorer.Move(tick - tickDiff);
-            PortalControl(tick);
-            if (Map.TimeAnomalies.Any(a => a.IntersectsWith(PresentExplorer.Collider)) || explorersFromPast.Any(e =>
-                e.FieldOfViewContains(this, new Vector(PresentExplorer.Location))))
-            {
-                removedExplorers.Clear();
-                foreach (var explorer in explorersFromPast)
-                    explorer.Repeat();
-                PresentExplorer = new Explorer(this, Map.ActualStage);
-            }
+            if (!Map.TimeAnomalies.Any(a => a.IntersectsWith(PresentExplorer.Collider))) return;
+            ResetStage();
+        }
+
+        private void FieldOfViewIntersectControl()
+        {
+            var c = PresentExplorer.Collider;
+            if (!explorersFromPast.Any(e =>
+                new[]
+                {
+                    new Vector(c.X, c.Y),
+                    //new Vector(c.X + c.Width, c.Y),
+                    new Vector(c.X, c.Y + c.Height),
+                    new Vector(c.X + c.Width, c.Y + c.Height)
+                }.Any(p => e.FieldOfViewContains(this, p)))) return;
+            ResetStage();
+        }
+
+        private void ResetStage()
+        {
+            removedExplorers.Clear();
+            foreach (var explorer in explorersFromPast)
+                explorer.Repeat();
+            PresentExplorer = new Explorer(this, Map.ActualStage);
         }
     }
 }
