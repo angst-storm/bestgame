@@ -20,12 +20,12 @@ namespace TimeCollapse.View
         private List<Bitmap> explorerRight;
         private List<Bitmap> explorerWalkLeft;
         private List<Bitmap> explorerWalkRight;
+        private Game game;
+        private IEnumerator<Map> levelsEnumerator;
         private List<Bitmap> portalAnimation;
         private IEnumerator<Bitmap> portalEnumerator;
         private List<Bitmap> timeAnomalyAnimation;
         private IEnumerator<Bitmap> timeAnomalyEnumerator;
-        private Game game;
-        private IEnumerator<Map> levelsEnumerator;
         private int timerTick;
 
         public GameControl(MainForm form)
@@ -120,6 +120,7 @@ namespace TimeCollapse.View
                 portalEnumerator = portalAnimation.GetEnumerator();
                 portalEnumerator.MoveNext();
             }
+
             g.DrawImage(portalEnumerator.Current ?? throw new InvalidOperationException(), game.Map.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {

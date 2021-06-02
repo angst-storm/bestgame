@@ -11,37 +11,10 @@ namespace TimeCollapse.Models
         private const int ViewingRange = 320;
         private const int NumberOfRays = 100;
         private static double ViewAngleHalfRad => ViewAngleHalf * (Math.PI / 180);
-        
+
         public static Point[] GetFieldOfNonTrivial(this Explorer e, Game game)
         {
-            var viewRect = GetViewRectangle(e);
-            var linesInSight = game.Map.Blocks.Where(b => b.IntersectsWith(viewRect)).SelectMany(b => new[]
-            {
-                (new Vector(b.Left, b.Top), new Vector(b.Right, b.Top)),
-                (new Vector(b.Left, b.Bottom), new Vector(b.Right, b.Bottom)),
-                (new Vector(b.Left, b.Top), new Vector(b.Left, b.Bottom)),
-                (new Vector(b.Right, b.Top), new Vector(b.Right, b.Bottom))
-            }).ToList();
-
-            var start = new Vector(e.TurnedRight ? viewRect.Left : viewRect.Right,
-                viewRect.Top + viewRect.Size.Height / 2);
-            var currentVector = new Vector(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Top) - start;
-            var dAngle = (e.TurnedRight ? -1 : 1) * ViewAngleHalfRad * 2 / NumberOfRays;
-
-            var result = new List<Point> {start.ToPoint()};
-            for (var i = 0; i < NumberOfRays; i++)
-            {
-                var shortestCrossedRay = start + currentVector;
-                foreach (var line in linesInSight)
-                    if (RayCross(start, currentVector, line, out var cross))
-                        if ((cross - start).Length < (shortestCrossedRay - start).Length)
-                            shortestCrossedRay = cross;
-
-                result.Add(shortestCrossedRay.ToPoint());
-                currentVector = currentVector.Turn(dAngle);
-            }
-
-            return result.ToArray();
+            throw new NotImplementedException();
         }
 
         public static Point[] GetFieldOfViewRayTracing(this Explorer e, Game game)
