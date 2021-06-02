@@ -12,7 +12,7 @@ namespace TimeCollapse.Models
         private const int NumberOfRays = 100;
         private static double ViewAngleHalfRad => ViewAngleHalf * (Math.PI / 180);
 
-        public static Point[] GetFieldOfNonTrivial(this Explorer e, Game game)
+        public static Point[] GetFieldOfViewNonTrivial(this Explorer e, Game game)
         {
             throw new NotImplementedException();
         }
