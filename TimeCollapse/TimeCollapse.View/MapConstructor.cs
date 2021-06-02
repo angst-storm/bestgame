@@ -9,7 +9,7 @@ namespace TimeCollapse.View
 {
     public sealed class MapConstructor : UserControl
     {
-        public readonly HashSet<Rectangle> Blocks = new();
+        public HashSet<Rectangle> Blocks { get; }= new();
         private readonly ConstructorControl constructorControl;
         private readonly List<(Rectangle, Rectangle)> stages = new();
         private bool draw;

@@ -13,11 +13,8 @@ namespace TimeCollapse.View
     {
         private readonly MainForm mainForm;
         private readonly MapConstructor mapConstructor;
-        public ComboBox Details;
         private TextBox messages;
         private TextBox name;
-        public ComboBox Stages;
-        public BindingList<ConstructorStage> StagesList;
 
         public ConstructorControl(MainForm form)
         {
@@ -49,6 +46,10 @@ namespace TimeCollapse.View
                 }, 0, 1);
             Controls.Add(table);
         }
+
+        public ComboBox Details { get; private set; }
+        public ComboBox Stages { get; private set; }
+        public BindingList<ConstructorStage> StagesList { get; private set; }
 
         public void PrintException(string message)
         {
