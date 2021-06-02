@@ -85,5 +85,27 @@ namespace TimeCollapse.Models
         {
             return (b.Y - a.Y, a.X - b.X, a.Y * b.X - a.X * b.Y);
         }
+
+        public static bool FieldOfViewContains(this Explorer e, Game game, Vector point)
+        {
+            var viewRect = GetViewRectangle(e);
+            if (!viewRect.Contains(point.ToPoint())) return false;
+            var start = new Vector(e.TurnedRight ? viewRect.Left : viewRect.Right,
+                viewRect.Top + viewRect.Size.Height / 2);
+            var comparativeVector = new Vector(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Top) - start;
+            var ray = point - start;
+            if (Math.Atan2(Math.Abs(ray.Y), Math.Abs(ray.X)) > Math.Atan2(Math.Abs(comparativeVector.Y), Math.Abs(comparativeVector.X)))
+                return false;
+            var linesInSight = game.Map.Blocks.Where(b => b.IntersectsWith(viewRect)).SelectMany(b => new[]
+            {
+                (new Vector(b.Left, b.Top), new Vector(b.Right, b.Top)),
+                (new Vector(b.Left, b.Bottom), new Vector(b.Right, b.Bottom)),
+                (new Vector(b.Left, b.Top), new Vector(b.Left, b.Bottom)),
+                (new Vector(b.Right, b.Top), new Vector(b.Right, b.Bottom))
+            }).ToList();
+            return !linesInSight.Any(l => RayCross(start, ray, l, out _));
+        }
+        
+        
     }
 }

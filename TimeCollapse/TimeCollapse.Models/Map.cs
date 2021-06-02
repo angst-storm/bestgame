@@ -51,7 +51,7 @@ namespace TimeCollapse.Models
         public static readonly BindingList<Map> AllMaps = new();
 
         private readonly List<Stage> stages;
-        private readonly IEnumerator<Stage> stagesSwitcher;
+        private IEnumerator<Stage> stagesSwitcher;
 
         static Map()
         {
@@ -85,7 +85,9 @@ namespace TimeCollapse.Models
         {
             if (!stagesSwitcher.MoveNext())
             {
-                ActualStage = stages[0];
+                stagesSwitcher = stages.GetEnumerator();
+                stagesSwitcher.MoveNext();
+                ActualStage = stagesSwitcher.Current;
                 return false;
             }
 

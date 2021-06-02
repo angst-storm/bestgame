@@ -52,7 +52,8 @@ namespace TimeCollapse.Models
             foreach (var explorer in AllExplorers)
                 explorer.Move(tick - tickDiff);
             PortalControl(tick);
-            if (Map.TimeAnomalies.Any(a => a.IntersectsWith(PresentExplorer.Collider)))
+            if (Map.TimeAnomalies.Any(a => a.IntersectsWith(PresentExplorer.Collider)) || explorersFromPast.Any(e =>
+                e.FieldOfViewContains(this, new Vector(PresentExplorer.Location))))
             {
                 removedExplorers.Clear();
                 foreach (var explorer in explorersFromPast)
