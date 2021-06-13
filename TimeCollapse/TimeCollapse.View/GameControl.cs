@@ -24,13 +24,13 @@ namespace TimeCollapse.View
         private List<Bitmap> explorerWalkLeft;
         private List<Bitmap> explorerWalkRight;
         private Game game;
+        private List<Bitmap> indicatorAnimation;
+        private IEnumerator<Bitmap> indicatorEnumerator;
         private IEnumerator<Map> levelsEnumerator;
         private List<Bitmap> portalAnimation;
         private IEnumerator<Bitmap> portalEnumerator;
         private List<Bitmap> timeAnomalyAnimation;
         private IEnumerator<Bitmap> timeAnomalyEnumerator;
-        private List<Bitmap> indicatorAnimation;
-        private IEnumerator<Bitmap> indicatorEnumerator;
         private int timerTick;
 
         public GameControl(MainForm form)
@@ -123,7 +123,7 @@ namespace TimeCollapse.View
             }
 
             var currentTimeAnomaly = timeAnomalyEnumerator.Current;
-            foreach (var anomaly in game.Map.TimeAnomalies)
+            foreach (var anomaly in game.Map.TimeAnomalies.SelectMany(r => CutRectangle(r, new Size(16, 16))))
                 g.DrawImage(currentTimeAnomaly ?? throw new Exception("Animation dont work"), anomaly);
             if (!portalEnumerator.MoveNext())
             {
@@ -175,6 +175,13 @@ namespace TimeCollapse.View
             return animationsEnumerators[explorer].Item2.Current;
         }
 
+        private IEnumerable<Rectangle> CutRectangle(Rectangle origin, Size part)
+        {
+            for (var i = origin.Left; i < origin.Right; i += part.Width)
+            for (var j = origin.Top; j < origin.Bottom; j += part.Height)
+                yield return new Rectangle(new Point(i, j), part);
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Space)
@@ -223,7 +230,7 @@ namespace TimeCollapse.View
             portalEnumerator = portalAnimation.GetEnumerator();
 
             var timeAnomalyImage = new Bitmap(Image.FromFile(@"Assets\TimeAnomaly.png"));
-            timeAnomalyAnimation = SplitImage(timeAnomalyImage, new Size(20 * 3, 20 * 3), 3).ToList();
+            timeAnomalyAnimation = SplitImage(timeAnomalyImage, new Size(16 * 3, 16 * 3), 5).ToList();
             timeAnomalyEnumerator = timeAnomalyAnimation.GetEnumerator();
 
             var indicatorImage = new Bitmap(Image.FromFile(@"Assets\Indicator.png"));
