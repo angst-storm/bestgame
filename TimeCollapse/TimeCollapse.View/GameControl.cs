@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 using TimeCollapse.Models;
@@ -28,6 +29,8 @@ namespace TimeCollapse.View
         private IEnumerator<Bitmap> portalEnumerator;
         private List<Bitmap> timeAnomalyAnimation;
         private IEnumerator<Bitmap> timeAnomalyEnumerator;
+        private List<Bitmap> indicatorAnimation;
+        private IEnumerator<Bitmap> indicatorEnumerator;
         private int timerTick;
 
         public GameControl(MainForm form)
@@ -131,9 +134,20 @@ namespace TimeCollapse.View
             g.DrawImage(portalEnumerator.Current ?? throw new InvalidOperationException(), game.Map.ActualStage.Target);
             foreach (var explorer in game.AllExplorers)
             {
-                g.FillPolygon(new SolidBrush(Color.Goldenrod), explorer.GetFieldOfViewRayTracing(game));
+                g.FillPolygon(new HatchBrush(HatchStyle.LightDownwardDiagonal, Color.FromArgb(125, 218, 165, 32)),
+                    explorer.GetFieldOfViewRayTracing(game));
                 g.DrawImage(GetCurrentSprite(explorer), explorer.Collider);
             }
+
+            if (!indicatorEnumerator.MoveNext())
+            {
+                indicatorEnumerator = indicatorAnimation.GetEnumerator();
+                indicatorEnumerator.MoveNext();
+            }
+
+            var expRect = game.PresentExplorer.Collider;
+            g.DrawImage(indicatorEnumerator.Current ?? throw new Exception("не работаит"),
+                new Rectangle(expRect.X, expRect.Y - expRect.Height / 2, expRect.Width, expRect.Height / 2));
         }
 
         private Bitmap GetCurrentSprite(Explorer explorer)
@@ -211,6 +225,10 @@ namespace TimeCollapse.View
             var timeAnomalyImage = new Bitmap(Image.FromFile(@"Assets\TimeAnomaly.png"));
             timeAnomalyAnimation = SplitImage(timeAnomalyImage, new Size(20 * 3, 20 * 3), 3).ToList();
             timeAnomalyEnumerator = timeAnomalyAnimation.GetEnumerator();
+
+            var indicatorImage = new Bitmap(Image.FromFile(@"Assets\Indicator.png"));
+            indicatorAnimation = SplitImage(indicatorImage, new Size(16 * 3, 16 * 3), 3).ToList();
+            indicatorEnumerator = indicatorAnimation.GetEnumerator();
 
             background = new Bitmap(Image.FromFile(@"Assets\Background.png"));
         }

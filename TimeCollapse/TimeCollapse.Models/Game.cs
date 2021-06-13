@@ -62,7 +62,7 @@ namespace TimeCollapse.Models
         private void FieldOfViewIntersectControl()
         {
             var c = PresentExplorer.Collider;
-            if (!explorersFromPast.Any(e =>
+            if (!explorersFromPast.Except(removedExplorers).Any(e =>
                 new[]
                 {
                     new Vector(c.X, c.Y),

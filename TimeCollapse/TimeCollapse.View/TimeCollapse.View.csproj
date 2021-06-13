@@ -63,6 +63,12 @@
       <Content Include="Assets\TimeAnomaly.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <None Remove="Assets\Indicator.png" />
+      <None Remove="Assets\Indicator2.png" />
+      <None Remove="Assets\Indicator3.png" />
+      <Content Include="Assets\Indicator.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>
