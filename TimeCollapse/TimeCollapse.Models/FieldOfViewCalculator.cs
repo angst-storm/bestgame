@@ -15,7 +15,7 @@ namespace TimeCollapse.Models
         public static Point[] GetFieldOfViewNonTrivial(this Explorer e, Game game)
         {
             const double deltaAngle = 52e-4;
-            
+
             var viewRect = GetViewRectangle(e);
             var linesInSight = game.Map.Blocks.Where(b => b.IntersectsWith(viewRect)).SelectMany(b => new[]
             {
@@ -24,7 +24,7 @@ namespace TimeCollapse.Models
                 (new Vector(b.Left, b.Top), new Vector(b.Left, b.Bottom)),
                 (new Vector(b.Right, b.Top), new Vector(b.Right, b.Bottom))
             }).ToList();
-            
+
             var start = new Vector(e.TurnedRight ? viewRect.Left : viewRect.Right,
                 viewRect.Top + viewRect.Size.Height / 2);
             var nodesInSight =
@@ -46,13 +46,12 @@ namespace TimeCollapse.Models
                     .OrderBy(v => Math.Atan2(v.Y, v.X))
                     .SkipWhile(v => Math.Atan2(v.Y, v.X) <= -ViewAngleHalfRad)
                     .TakeWhile(v => Math.Atan2(v.Y, v.X) <= +ViewAngleHalfRad);
-            
+
             var result = new List<Point> {start.ToPoint()};
             var current = new Vector(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Top) - start;
             var lastVectorCrossed = NearestCrossPoint(start, current, linesInSight, out var point);
             result.Add(point);
             foreach (var node in nodesInSight)
-            {
                 if (lastVectorCrossed)
                 {
                     current = node;
@@ -69,12 +68,12 @@ namespace TimeCollapse.Models
 
                     current = node;
                 }
-            }
 
             return result.ToArray();
         }
 
-        private static bool NearestCrossPoint(Vector start, Vector ray, IEnumerable<(Vector,Vector)> linesInSight, out Point point)
+        private static bool NearestCrossPoint(Vector start, Vector ray, IEnumerable<(Vector, Vector)> linesInSight,
+            out Point point)
         {
             var shortestCrossedRay = start + ray;
             foreach (var line in linesInSight)

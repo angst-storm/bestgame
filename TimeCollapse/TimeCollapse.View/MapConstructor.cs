@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -9,188 +9,266 @@ namespace TimeCollapse.View
 {
     public sealed class MapConstructor : UserControl
     {
-        private readonly ConstructorControl constructorControl;
-        private readonly List<(Rectangle, Rectangle)> stages = new();
-        private bool draw;
-        private Rectangle drawableRectangle;
-        private Point drawStartPoint;
+        private readonly MainForm mainForm;
+        private readonly MapConstructorCanvas mapConstructorCanvas;
+        private TextBox messages;
+        private TextBox name;
 
-        public MapConstructor(ConstructorControl constructorControl)
+        public MapConstructor(MainForm form)
         {
-            this.constructorControl = constructorControl;
-            BackgroundImage = BackGroundDots();
+            mainForm = form;
+            ClientSize = mainForm.Size;
+            BackColor = Color.FromArgb(18, 62, 64);
 
-            constructorControl.Stages.SelectedIndexChanged += (sender, args) => Invalidate();
+            var table = new TableLayoutPanel
+            {
+                Location = new Point(),
+                Size = ClientSize
+            };
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 108));
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, ClientSize.Height - 108));
+            table.Controls.Add(InitializeControlTable(), 0, 0);
 
-            SetStyle(ControlStyles.OptimizedDoubleBuffer |
-                     ControlStyles.AllPaintingInWmPaint |
-                     ControlStyles.UserPaint, true);
-            UpdateStyles();
+            mapConstructorCanvas = new MapConstructorCanvas(this) {Dock = DockStyle.Fill};
+            table.Controls.Add(Screen.PrimaryScreen.Bounds.Size == new Size(1920, 1080)
+                ? mapConstructorCanvas
+                : new Label
+                {
+                    Text =
+                        @"К сожалению, пока конструктор доступен только пользователям с разрешением экрана 1920 на 1080",
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    BackColor = Color.Azure,
+                    Dock = DockStyle.Fill
+                }, 0, 1);
+            Controls.Add(table);
         }
 
-        public HashSet<Rectangle> Blocks { get; } = new();
-        public HashSet<Rectangle> TimeAnomalies { get; } = new();
+        public ComboBox Details { get; private set; }
+        public ComboBox Stages { get; private set; }
+        public BindingList<ConstructorStage> StagesList { get; private set; }
 
-        private ConstructorDetail ActiveDetail =>
-            constructorControl.Details.SelectedItem.ToString() switch
-            {
-                "Блок" => ConstructorDetail.Block,
-                "Временные аномалии" => ConstructorDetail.TimeAnomaly,
-                "Стартовый прямоугольник" => ConstructorDetail.StartRectangle,
-                "Целевой прямоугольник" => ConstructorDetail.TargetRectangle,
-                _ => throw new InvalidOperationException()
-            };
-
-        private ConstructorStage ActiveStage => constructorControl.StagesList[constructorControl.Stages.SelectedIndex];
-
-        protected override void OnMouseDown(MouseEventArgs e)
+        public void PrintException(string message)
         {
-            if (e.Button == MouseButtons.Right)
+            messages.BackColor = Color.Azure;
+            messages.ForeColor = Color.Red;
+            messages.Text = message;
+        }
+
+        private void PrintGoodMessage(string message)
+        {
+            messages.BackColor = Color.Azure;
+            messages.ForeColor = Color.Green;
+            messages.Text = message;
+        }
+
+        private void CompileMap()
+        {
+            if (Map.AllMaps.Any(m => string.Compare(m.Name, name.Text, StringComparison.Ordinal) == 0))
             {
-                if (drawableRectangle.Contains(e.Location)) RemoveDrawableRectangle();
+                PrintException("Карта с таким названием уже есть в коллекции");
+                return;
             }
-            else
+
+            foreach (var stage in StagesList)
             {
-                if (!TryTakeExistingRectangle(e.Location, out drawableRectangle))
+                if (stage.Spawn == Rectangle.Empty)
                 {
-                    draw = true;
-                    drawStartPoint = new Point(RoundedTo(16, e.Location.X), RoundedTo(16, e.Location.Y));
+                    PrintException($"На стадии {stage.Number} не задан стартовый прямоугольник");
+                    return;
+                }
+
+                if (stage.Target == Rectangle.Empty)
+                {
+                    PrintException($"На стадии {stage.Number} не задан целевой прямоугольник");
+                    return;
                 }
             }
 
-            Invalidate();
+            Map.SaveMap(new Map(name.Text, mapConstructorCanvas.Blocks, mapConstructorCanvas.TimeAnomalies,
+                StagesList.Select(cs => new Stage(cs.Spawn.Location, cs.Target))));
+
+            PrintGoodMessage($"Новая карта \"{name.Text}\" создана");
         }
 
-        protected override void OnMouseMove(MouseEventArgs e)
+        private TableLayoutPanel InitializeControlTable()
         {
-            if (!draw) return;
-
-            drawableRectangle = new Rectangle(drawStartPoint,
-                new Size(RoundedTo(16, e.Location.X - drawStartPoint.X),
-                    RoundedTo(16, e.Location.Y - drawStartPoint.Y)));
-            Invalidate();
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill};
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15));
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
+            table.Controls.Add(DetailsTable(), 0, 0);
+            table.Controls.Add(StagesTable(), 1, 0);
+            table.Controls.Add(CurrentMap(), 2, 0);
+            table.Controls.Add(SavedMaps(), 3, 0);
+            table.Controls.Add(ExitButton(), 4, 0);
+            return table;
         }
 
-        protected override void OnMouseUp(MouseEventArgs e)
+        private GroupBox DetailsTable()
         {
-            if (!draw) return;
-            if (drawableRectangle.Width != 0 && drawableRectangle.Height != 0)
-                SaveDrawableRectangle();
-            draw = false;
-            Invalidate();
-        }
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Элементы", ForeColor = Color.Azure};
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill};
 
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            var g = e.Graphics;
-            if (Blocks.Count > 0) g.FillRectangles(new SolidBrush(Color.DimGray), Blocks.ToArray());
-            if (TimeAnomalies.Count > 0) g.FillRectangles(new SolidBrush(Color.BlueViolet), TimeAnomalies.ToArray());
-            if (ActiveStage.Spawn != Rectangle.Empty)
-                g.FillRectangle(new SolidBrush(Color.Goldenrod), ActiveStage.Spawn);
-            if (ActiveStage.Target != Rectangle.Empty)
-                g.FillRectangle(new SolidBrush(Color.DarkGreen), ActiveStage.Target);
-            if (!drawableRectangle.IsEmpty) g.FillRectangle(new SolidBrush(Color.Firebrick), drawableRectangle);
-        }
-
-        private void SaveDrawableRectangle()
-        {
-            switch (ActiveDetail)
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            Details = new ComboBox
             {
-                case ConstructorDetail.Block:
-                    Blocks.Add(drawableRectangle);
-                    break;
-                case ConstructorDetail.TimeAnomaly:
-                    TimeAnomalies.Add(drawableRectangle);
-                    break;
-                case ConstructorDetail.StartRectangle when drawableRectangle.Size == Explorer.DefaultColliderSize:
-                    ActiveStage.Spawn = drawableRectangle;
-                    break;
-                case ConstructorDetail.StartRectangle:
-                    constructorControl.PrintException(
-                        $"Стартовый прямоугольник должен быть размера {Explorer.DefaultColliderSize.Width}x{Explorer.DefaultColliderSize.Height}");
-                    drawableRectangle = Rectangle.Empty;
-                    break;
-                case ConstructorDetail.TargetRectangle:
-                    ActiveStage.Target = drawableRectangle;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                Dock = DockStyle.Fill,
+                BackColor = Color.Azure
+            };
+            Details.Items.AddRange(new object[]
+                {"Блок", "Временные аномалии", "Стартовый прямоугольник", "Целевой прямоугольник"});
+            Details.SelectedIndex = 0;
+            table.Controls.Add(Details, 0, 0);
+
+            group.Controls.Add(table);
+            return group;
         }
 
-        private void RemoveDrawableRectangle()
+        private GroupBox StagesTable()
         {
-            switch (ActiveDetail)
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Стадии", ForeColor = Color.Azure};
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill};
+
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
+            StagesList = new BindingList<ConstructorStage> {new(0)};
+            Stages = new ComboBox
             {
-                case ConstructorDetail.Block:
-                    Blocks.Remove(drawableRectangle);
-                    break;
-                case ConstructorDetail.TimeAnomaly:
-                    TimeAnomalies.Remove(drawableRectangle);
-                    break;
-                case ConstructorDetail.StartRectangle:
-                    ActiveStage.Spawn = Rectangle.Empty;
-                    break;
-                case ConstructorDetail.TargetRectangle:
-                    ActiveStage.Target = Rectangle.Empty;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                Dock = DockStyle.Fill,
+                BackColor = Color.Azure,
+                DataSource = StagesList,
+                DisplayMember = "Number"
+            };
+            table.Controls.Add(Stages, 0, 0);
 
-            drawableRectangle = Rectangle.Empty;
-        }
-
-        private bool TryTakeExistingRectangle(Point point, out Rectangle rect)
-        {
-            rect = Rectangle.Empty;
-
-            switch (ActiveDetail)
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Stages.Size.Height));
+            var decrement = new Button
             {
-                case ConstructorDetail.Block when Blocks.Any(b => b.Contains(point)):
-                    rect = Blocks.First(b => b.Contains(point));
-                    return true;
-                case ConstructorDetail.Block:
-                    return false;
-                case ConstructorDetail.TimeAnomaly when TimeAnomalies.Any(b => b.Contains(point)):
-                    rect = TimeAnomalies.First(b => b.Contains(point));
-                    return true;
-                case ConstructorDetail.TimeAnomaly:
-                    return false;
-                case ConstructorDetail.StartRectangle when ActiveStage.Spawn.Contains(point):
-                    rect = ActiveStage.Spawn;
-                    return true;
-                case ConstructorDetail.StartRectangle:
-                    return false;
-                case ConstructorDetail.TargetRectangle when ActiveStage.Target.Contains(point):
-                    rect = ActiveStage.Target;
-                    return true;
-                case ConstructorDetail.TargetRectangle:
-                    return false;
-                default:
-                    throw new InvalidOperationException();
-            }
+                Size = new Size(Stages.Size.Height, Stages.Size.Height),
+                Text = @"-",
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = Color.Black,
+                BackColor = Color.Azure
+            };
+            decrement.Click += (sender, args) =>
+            {
+                if (StagesList.Count > 1)
+                    StagesList.RemoveAt(StagesList.Count - 1);
+            };
+            table.Controls.Add(decrement, 1, 0);
+
+            table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Stages.Size.Height));
+            var increment = new Button
+            {
+                Size = new Size(Stages.Size.Height, Stages.Size.Height),
+                Text = @"+",
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = Color.Black,
+                BackColor = Color.Azure
+            };
+            increment.Click += (sender, args) =>
+            {
+                StagesList.Add(new ConstructorStage(StagesList.Count));
+                Stages.SelectedIndex = StagesList.Count - 1;
+            };
+            table.Controls.Add(increment, 2, 0);
+
+            group.Controls.Add(table);
+            return group;
         }
 
-        private static Bitmap BackGroundDots()
+        private GroupBox CurrentMap()
         {
-            // TODO адаптировать под разрешение
-            var dots = new Bitmap(1920, 1080);
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Текущая карта", ForeColor = Color.Azure};
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill};
 
-            var g = Graphics.FromImage(dots);
-            g.Clear(Color.Silver);
-            for (var x = 0; x < 1920; x += 16)
-            for (var y = 0; y < 1080; y += 16)
-                g.FillEllipse(new SolidBrush(Color.DimGray), x - 1, y - 1, 2, 2);
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            name = new TextBox
+            {
+                Dock = DockStyle.Fill,
+                Text = "Название",
+                BackColor = Color.Azure
+            };
+            table.Controls.Add(name, 0, 0);
 
-            return dots;
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            var save = new Button
+            {
+                Dock = DockStyle.Fill,
+                Text = "Сохранить",
+                ForeColor = Color.Black,
+                BackColor = Color.Azure
+            };
+            save.Click += (sender, args) => CompileMap();
+            table.Controls.Add(save, 0, 1);
+
+            group.Controls.Add(table);
+            return group;
         }
 
-        private static int RoundedTo(int to, int value)
+        private GroupBox SavedMaps()
         {
-            var x = value % to;
-            if (x <= to / 2) return value - x;
-            return value + to - x;
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Сохраненные карты", ForeColor = Color.Azure};
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill};
+
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            var open = new Button
+            {
+                Dock = DockStyle.Fill,
+                Text = "Открыть",
+                ForeColor = Color.Black,
+                BackColor = Color.Azure,
+                Enabled = false
+            };
+            table.Controls.Add(open, 0, 0);
+
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            var delete = new Button
+            {
+                Dock = DockStyle.Fill,
+                Text = "Удалить",
+                ForeColor = Color.Black,
+                BackColor = Color.Azure,
+                Enabled = false
+            };
+            table.Controls.Add(delete, 0, 1);
+
+            group.Controls.Add(table);
+            return group;
+        }
+
+        private TableLayoutPanel ExitButton()
+        {
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill, Margin = Padding.Empty};
+
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 60));
+            var group = new GroupBox {Dock = DockStyle.Fill, Text = @"Сообщения", ForeColor = Color.Azure};
+            messages = new TextBox
+            {
+                Dock = DockStyle.Fill,
+                ReadOnly = true,
+                Text = ""
+            };
+            group.Controls.Add(messages);
+            table.Controls.Add(group, 0, 0);
+
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 40));
+            var exitTable = new TableLayoutPanel {Dock = DockStyle.Fill};
+            exitTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
+            exitTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
+            exitTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
+            var exitButton = new Button
+            {
+                Text = @"Назад",
+                BackColor = Color.Azure,
+                Dock = DockStyle.Fill
+            };
+            exitButton.Click += (sender, args) => mainForm.ToMainMenu(this);
+            exitTable.Controls.Add(exitButton, 2, 0);
+
+            table.Controls.Add(exitTable, 0, 1);
+            return table;
         }
     }
 }

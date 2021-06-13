@@ -2,6 +2,7 @@
 
 namespace TimeCollapse.Models.Tests
 {
+    [TestFixture]
     public class FieldOfViewCalculatorTests
     {
         [TestCase(1, 1, true)]

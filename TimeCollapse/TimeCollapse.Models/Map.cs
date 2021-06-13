@@ -2,12 +2,57 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 
 namespace TimeCollapse.Models
 {
     public class Map
     {
+        public readonly List<Stage> Stages;
+        private IEnumerator<Stage> stagesSwitcher;
+
+        public Map(string name, IEnumerable<Rectangle> blocks, IEnumerable<Rectangle> timeAnomalies,
+            IEnumerable<Stage> stages)
+        {
+            Name = name;
+            Blocks = blocks.ToHashSet();
+            TimeAnomalies = timeAnomalies.ToHashSet();
+            Stages = stages.ToList();
+            stagesSwitcher = Stages.GetEnumerator();
+            if (stagesSwitcher.MoveNext())
+                ActualStage = stagesSwitcher.Current;
+        }
+
+        public string Name { get; }
+
+        public Stage ActualStage { get; private set; }
+
+        public HashSet<Rectangle> Blocks { get; }
+
+        public HashSet<Rectangle> TimeAnomalies { get; }
+
+        public bool TrySwitchStage()
+        {
+            if (!stagesSwitcher.MoveNext())
+            {
+                ResetMap();
+                return false;
+            }
+
+            ActualStage = stagesSwitcher.Current;
+            return true;
+        }
+
+        public void ResetMap()
+        {
+            stagesSwitcher = Stages.GetEnumerator();
+            stagesSwitcher.MoveNext();
+            ActualStage = stagesSwitcher.Current;
+        }
+
+        #region StaticMembers
+
         private static readonly Map TestMap = new("Тестовая карта", new[]
         {
             new Rectangle(32, 720, 960, 16),
@@ -50,54 +95,30 @@ namespace TimeCollapse.Models
 
         public static readonly BindingList<Map> AllMaps = new();
 
-        private readonly List<Stage> stages;
-        private IEnumerator<Stage> stagesSwitcher;
+        public static Map[] Plot { get; } = {TestMap, SpiralMap};
 
         static Map()
         {
             foreach (var map in Plot)
                 AllMaps.Add(map);
+            var maps = File.ReadLines(@"UserMaps.txt");
+            foreach (var map in maps)
+                AllMaps.Add(MapConstructorSerializer.DeserializeMap(map));
         }
 
-        public Map(string name, IEnumerable<Rectangle> blocks, IEnumerable<Rectangle> timeAnomalies,
-            IEnumerable<Stage> stages)
+        public static void SaveMap(Map map)
         {
-            Name = name;
-            Blocks = blocks.ToHashSet();
-            TimeAnomalies = timeAnomalies.ToHashSet();
-            this.stages = stages.ToList();
-            stagesSwitcher = this.stages.GetEnumerator();
-            if (stagesSwitcher.MoveNext())
-                ActualStage = stagesSwitcher.Current;
+            if (map.Blocks.Count == 0) map.Blocks.Add(Rectangle.Empty);
+            if (map.TimeAnomalies.Count == 0) map.TimeAnomalies.Add(Rectangle.Empty);
+            if (map.Stages.Count == 0) throw new InvalidOperationException();
+
+            AllMaps.Add(map);
+
+            var sw = File.AppendText(@"UserMaps.txt");
+            sw.WriteLine(MapConstructorSerializer.SerializeMap(map));
+            sw.Close();
         }
 
-        public static Map[] Plot { get; } = {TestMap, SpiralMap};
-
-        public string Name { get; }
-
-        public Stage ActualStage { get; private set; }
-
-        public HashSet<Rectangle> Blocks { get; }
-
-        public HashSet<Rectangle> TimeAnomalies { get; }
-
-        public bool TrySwitchStage()
-        {
-            if (!stagesSwitcher.MoveNext())
-            {
-                ResetMap();
-                return false;
-            }
-
-            ActualStage = stagesSwitcher.Current;
-            return true;
-        }
-
-        public void ResetMap()
-        {
-            stagesSwitcher = stages.GetEnumerator();
-            stagesSwitcher.MoveNext();
-            ActualStage = stagesSwitcher.Current;
-        }
+        #endregion
     }
 }

@@ -6,7 +6,7 @@ namespace TimeCollapse.View
 {
     public class MainForm : Form
     {
-        private readonly ConstructorControl constructor;
+        private readonly MapConstructor constructor;
         private readonly GameControl game;
         private readonly MenuControl menu;
 
@@ -26,7 +26,7 @@ namespace TimeCollapse.View
             game = new GameControl(this) {Enabled = false};
             game.Hide();
 
-            constructor = new ConstructorControl(this) {Enabled = false};
+            constructor = new MapConstructor(this) {Enabled = false};
             constructor.Hide();
 
             Controls.AddRange(new Control[] {menu, game, constructor});
