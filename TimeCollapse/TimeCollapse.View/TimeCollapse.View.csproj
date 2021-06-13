@@ -42,27 +42,27 @@
       <None Remove="Assets\Explorer.png" />
       <None Remove="Assets\Portal.png" />
       <Content Include="Assets\Explo.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <Content Include="Assets\ExploWalk.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <None Remove="Assets\Explo.png" />
       <None Remove="Assets\ExploJump.png" />
       <Content Include="Assets\ExploJump.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <None Remove="Assets\ExploWalk.png" />
       <None Remove="Assets\Apocalypse.png" />
       <None Remove="Assets\ExploWalk x2.png" />
       <None Remove="Assets\PortalAnimation.png" />
-      <Resource Include="Assets\PortalAnimation.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Resource>
+      <Content Include="Assets\PortalAnimation.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
       <None Remove="Assets\TimeAmomaly.png" />
-      <Resource Include="Assets\TimeAnomaly.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Resource>
+      <Content Include="Assets\TimeAnomaly.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>
