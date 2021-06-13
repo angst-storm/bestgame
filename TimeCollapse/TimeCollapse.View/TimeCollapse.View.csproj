@@ -71,10 +71,10 @@
       <Content Include="Assets\TimeAnomaly.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
-    </ItemGroup>
-
-    <ItemGroup>
       <None Remove="UserMaps.txt" />
+      <Content Include="UserMaps.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
