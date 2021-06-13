@@ -12,6 +12,8 @@ namespace TimeCollapse.View
         private readonly Dictionary<Explorer, (Animation, IEnumerator<Bitmap>)> animationsEnumerators = new();
         private readonly MainForm mainForm;
         private readonly Control pause;
+        private readonly float sx;
+        private readonly float sy;
         private readonly Timer updateTimer;
         private Bitmap background;
         private List<Bitmap> explorerJumpLeft;
@@ -30,6 +32,10 @@ namespace TimeCollapse.View
 
         public GameControl(MainForm form)
         {
+            var res = Screen.PrimaryScreen.Bounds.Size;
+            sx = res.Width / 1920f;
+            sy = res.Height / 1080f;
+
             mainForm = form;
             ImportAssets();
 
@@ -105,6 +111,7 @@ namespace TimeCollapse.View
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;
+            g.ScaleTransform(sx, sy);
             g.FillRectangles(new SolidBrush(Color.DarkSlateGray), game.Map.Blocks.ToArray());
             if (!timeAnomalyEnumerator.MoveNext())
             {

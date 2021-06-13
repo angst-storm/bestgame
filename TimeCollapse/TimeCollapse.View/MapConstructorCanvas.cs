@@ -10,6 +10,8 @@ namespace TimeCollapse.View
     public sealed class MapConstructorCanvas : UserControl
     {
         private readonly MapConstructor mapConstructor;
+        private readonly float sx;
+        private readonly float sy;
         private bool draw;
         private Rectangle drawableRectangle;
         private Point drawStartPoint;
@@ -17,6 +19,11 @@ namespace TimeCollapse.View
         public MapConstructorCanvas(MapConstructor mapConstructor)
         {
             this.mapConstructor = mapConstructor;
+
+            var res = Screen.PrimaryScreen.Bounds.Size;
+            sx = res.Width / 1920f;
+            sy = res.Height / 1080f;
+
             BackgroundImage = BackGroundDots();
 
             mapConstructor.Stages.SelectedIndexChanged += (sender, args) => Invalidate();
@@ -44,16 +51,17 @@ namespace TimeCollapse.View
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            var eLocation = new Point((int) (e.Location.X / sx), (int) (e.Location.Y / sy));
             if (e.Button == MouseButtons.Right)
             {
-                if (drawableRectangle.Contains(e.Location)) RemoveDrawableRectangle();
+                if (drawableRectangle.Contains(eLocation)) RemoveDrawableRectangle();
             }
             else
             {
-                if (!TryTakeExistingRectangle(e.Location, out drawableRectangle))
+                if (!TryTakeExistingRectangle(eLocation, out drawableRectangle))
                 {
                     draw = true;
-                    drawStartPoint = new Point(RoundedTo(16, e.Location.X), RoundedTo(16, e.Location.Y));
+                    drawStartPoint = new Point(RoundedTo(16, eLocation.X), RoundedTo(16, eLocation.Y));
                 }
             }
 
@@ -62,11 +70,12 @@ namespace TimeCollapse.View
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
+            var eLocation = new Point((int) (e.Location.X / sx), (int) (e.Location.Y / sy));
             if (!draw) return;
 
             drawableRectangle = new Rectangle(drawStartPoint,
-                new Size(RoundedTo(16, e.Location.X - drawStartPoint.X),
-                    RoundedTo(16, e.Location.Y - drawStartPoint.Y)));
+                new Size(RoundedTo(16, eLocation.X - drawStartPoint.X),
+                    RoundedTo(16, eLocation.Y - drawStartPoint.Y)));
             Invalidate();
         }
 
@@ -82,6 +91,7 @@ namespace TimeCollapse.View
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;
+            g.ScaleTransform(sx, sy);
             if (Blocks.Count > 0) g.FillRectangles(new SolidBrush(Color.DimGray), Blocks.ToArray());
             if (TimeAnomalies.Count > 0) g.FillRectangles(new SolidBrush(Color.BlueViolet), TimeAnomalies.ToArray());
             if (ActiveStage.Spawn != Rectangle.Empty)
@@ -171,12 +181,11 @@ namespace TimeCollapse.View
             }
         }
 
-        private static Bitmap BackGroundDots()
+        private Bitmap BackGroundDots()
         {
-            // TODO адаптировать под разрешение
             var dots = new Bitmap(1920, 1080);
-
             var g = Graphics.FromImage(dots);
+            g.ScaleTransform(sx, sy);
             g.Clear(Color.Silver);
             for (var x = 0; x < 1920; x += 16)
             for (var y = 0; y < 1080; y += 16)
