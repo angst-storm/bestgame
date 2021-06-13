@@ -13,6 +13,7 @@ namespace TimeCollapse.View
         private readonly MapConstructorCanvas mapConstructorCanvas;
         private TextBox messages;
         private TextBox name;
+        private const string InstructionText = "Перед вами - конструктор карт для TimeCollapse.\nЭта игра построена на взаимодействии исследователей из разного времени, появляющихся в игре последовательно, друг за другом.\nЧтобы управлять появлением игроков вам нужно научиться пользоваться системой стадий. И это не сложно.\nКаждой стадии принадлежит свой игрок и, следовательно, активируются также последовательно, как и исследователи. Стадии можно добавлять и убавлять в панели инструментов сверху. Для каждой стадии обязательно должен быть задан стартовый прямоугольник - спавн (размером 2x4 клетки, это важно!) и целевой прямоугольник - портал, к которому будет стремиться этот игрок.\nВыбрать элемент, который вы хотите расположить сейчас, можно также в панели инструментов.\nБлоки — это платформы и стены, по которым будет бегать ваш игрок.\nВременные аномалии - ловушка, попадая в которую, игрок погибает.\nЧтобы расположить элемент, зажмите ПКМ в любой точке холста и ведите мышью из левого верхнего угла в нижний правый угол.\nЧтобы убрать расположенный элемент, кликните ЛКМ по нему (тип этого элемента должен быть выбран в поле \"Элементы\"!)\nДля сохранения карты введите в поле \"Название\" уникальное имя и нажмите \"Сохранить\". \nВ случае каких-либо ошибок, о них вам напомнит поле \"Сообщения\".\nСохраненные вами карты останутся с вами в игре, пока вы не решитесь их удалить.\nМожно открыть для редактирования или удалить свои карты в соответствующем поле.\nТворите и играйте, друзья!";
 
         public MapConstructor(MainForm form)
         {
@@ -20,6 +21,14 @@ namespace TimeCollapse.View
             ClientSize = mainForm.Size;
             BackColor = Color.FromArgb(18, 62, 64);
 
+            var instruction = Instruction(new Size(1000, 500));
+            Controls.Add(instruction);
+            EnabledChanged += (sender, args) =>
+            {
+                if (!Enabled) return;
+                instruction.Enabled = true;
+                instruction.Show();
+            };
             var table = new TableLayoutPanel
             {
                 Location = new Point(),
@@ -79,6 +88,40 @@ namespace TimeCollapse.View
                 StagesList.Select(cs => new Stage(cs.Spawn.Location, cs.Target))));
 
             PrintConfirmation($"Новая карта \"{name.Text}\" создана");
+        }
+
+        private Panel Instruction(Size size)
+        {
+            var panel = new Panel
+            {
+                Location = new Point(ClientSize.Width / 2 - size.Width / 2, ClientSize.Height / 2 - size.Height / 2),
+                Size = size,
+                BackColor = Color.Azure,
+                BorderStyle = BorderStyle.Fixed3D
+            };
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill};
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, size.Height - 40));
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
+            var text = new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = InstructionText,
+            };
+            table.Controls.Add(text, 0, 0);
+            var close = new Button
+            {
+                Dock = DockStyle.Fill,
+                Text = "Закрыть",
+                BackColor = Color.Azure
+            };
+            close.Click += (sender, args) =>
+            {
+                panel.Enabled = false;
+                panel.Hide();
+            };
+            table.Controls.Add(close, 0, 1);
+            panel.Controls.Add(table);
+            return panel;
         }
 
         private TableLayoutPanel InitializeControlTable()
