@@ -30,16 +30,7 @@ namespace TimeCollapse.View
             table.Controls.Add(InitializeControlTable(), 0, 0);
 
             mapConstructorCanvas = new MapConstructorCanvas(this) {Dock = DockStyle.Fill};
-            table.Controls.Add(Screen.PrimaryScreen.Bounds.Size == new Size(1920, 1080)
-                ? mapConstructorCanvas
-                : new Label
-                {
-                    Text =
-                        @"К сожалению, пока конструктор доступен только пользователям с разрешением экрана 1920 на 1080",
-                    TextAlign = ContentAlignment.MiddleCenter,
-                    BackColor = Color.Azure,
-                    Dock = DockStyle.Fill
-                }, 0, 1);
+            table.Controls.Add(mapConstructorCanvas, 0, 1);
             Controls.Add(table);
         }
 
@@ -54,14 +45,14 @@ namespace TimeCollapse.View
             messages.Text = message;
         }
 
-        private void PrintGoodMessage(string message)
+        private void PrintConfirmation(string message)
         {
             messages.BackColor = Color.Azure;
             messages.ForeColor = Color.Green;
             messages.Text = message;
         }
 
-        private void CompileMap()
+        private void SaveMap()
         {
             if (Map.AllMaps.Any(m => string.Compare(m.Name, name.Text, StringComparison.Ordinal) == 0))
             {
@@ -87,7 +78,7 @@ namespace TimeCollapse.View
             Map.SaveMap(new Map(name.Text, mapConstructorCanvas.Blocks, mapConstructorCanvas.TimeAnomalies,
                 StagesList.Select(cs => new Stage(cs.Spawn.Location, cs.Target))));
 
-            PrintGoodMessage($"Новая карта \"{name.Text}\" создана");
+            PrintConfirmation($"Новая карта \"{name.Text}\" создана");
         }
 
         private TableLayoutPanel InitializeControlTable()
@@ -115,7 +106,8 @@ namespace TimeCollapse.View
             Details = new ComboBox
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.Azure
+                BackColor = Color.Azure,
+                DropDownStyle = ComboBoxStyle.DropDownList
             };
             Details.Items.AddRange(new object[]
                 {"Блок", "Временные аномалии", "Стартовый прямоугольник", "Целевой прямоугольник"});
@@ -138,7 +130,8 @@ namespace TimeCollapse.View
                 Dock = DockStyle.Fill,
                 BackColor = Color.Azure,
                 DataSource = StagesList,
-                DisplayMember = "Number"
+                DisplayMember = "Number",
+                DropDownStyle = ComboBoxStyle.DropDownList
             };
             table.Controls.Add(Stages, 0, 0);
 
@@ -200,7 +193,7 @@ namespace TimeCollapse.View
                 ForeColor = Color.Black,
                 BackColor = Color.Azure
             };
-            save.Click += (sender, args) => CompileMap();
+            save.Click += (sender, args) => SaveMap();
             table.Controls.Add(save, 0, 1);
 
             group.Controls.Add(table);
@@ -218,8 +211,32 @@ namespace TimeCollapse.View
                 Dock = DockStyle.Fill,
                 Text = "Открыть",
                 ForeColor = Color.Black,
-                BackColor = Color.Azure,
-                Enabled = false
+                BackColor = Color.Azure
+            };
+            var panel1 = ListOfMaps(
+                new Point(ClientSize.Width / 2 - 250, ClientSize.Height / 2 - 150),
+                new Size(500, 300), list =>
+                {
+                    var map = (Map) list.SelectedItem;
+                    name.Text = map.Name;
+                    mapConstructorCanvas.Blocks = map.Blocks.ToHashSet();
+                    mapConstructorCanvas.TimeAnomalies = map.TimeAnomalies.ToHashSet();
+                    StagesList.Clear();
+                    for (var i = 0; i < map.Stages.Count; i++)
+                        StagesList.Add(new ConstructorStage(i)
+                        {
+                            Spawn = new Rectangle(map.Stages[i].Spawn, Explorer.DefaultColliderSize),
+                            Target = map.Stages[i].Target
+                        });
+                    mapConstructorCanvas.Refresh();
+                });
+            Controls.Add(panel1);
+            panel1.Enabled = false;
+            panel1.Hide();
+            open.Click += (sender, args) =>
+            {
+                panel1.Enabled = true;
+                panel1.Show();
             };
             table.Controls.Add(open, 0, 0);
 
@@ -229,13 +246,70 @@ namespace TimeCollapse.View
                 Dock = DockStyle.Fill,
                 Text = "Удалить",
                 ForeColor = Color.Black,
-                BackColor = Color.Azure,
-                Enabled = false
+                BackColor = Color.Azure
+            };
+            var panel2 = ListOfMaps(new Point(ClientSize.Width / 2 - 250, ClientSize.Height / 2 - 150),
+                new Size(500, 300),
+                list => { Map.DeleteMap((Map) list.SelectedItem); });
+            Controls.Add(panel2);
+            panel2.Enabled = false;
+            panel2.Hide();
+            delete.Click += (sender, args) =>
+            {
+                panel2.Enabled = true;
+                panel2.Show();
             };
             table.Controls.Add(delete, 0, 1);
 
             group.Controls.Add(table);
             return group;
+        }
+
+        private Panel ListOfMaps(Point location, Size size, Action<ListBox> okButtonClick)
+        {
+            var panel = new Panel {Location = location, Size = size};
+            var table = new TableLayoutPanel {Dock = DockStyle.Fill};
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 220));
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
+            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
+
+            var list = new ListBox
+            {
+                Dock = DockStyle.Fill,
+                DataSource = Map.AllMaps,
+                DisplayMember = "Name"
+            };
+            table.Controls.Add(list, 0, 0);
+
+            var okButton = new Button
+            {
+                Dock = DockStyle.Fill,
+                Text = "ОК",
+                BackColor = Color.Azure
+            };
+            okButton.Click += (sender, args) =>
+            {
+                okButtonClick(list);
+                panel.Enabled = false;
+                panel.Hide();
+            };
+            table.Controls.Add(okButton, 0, 1);
+
+            var exitButton = new Button
+            {
+                Dock = DockStyle.Fill,
+                Text = "Закрыть",
+                BackColor = Color.Azure
+            };
+            exitButton.Click += (sender, args) =>
+            {
+                panel.Enabled = false;
+                panel.Hide();
+            };
+            table.Controls.Add(exitButton, 0, 2);
+
+            panel.Controls.Add(table);
+            return panel;
         }
 
         private TableLayoutPanel ExitButton()

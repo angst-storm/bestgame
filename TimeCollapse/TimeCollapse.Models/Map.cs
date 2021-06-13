@@ -119,6 +119,14 @@ namespace TimeCollapse.Models
             sw.Close();
         }
 
+        public static void DeleteMap(Map map)
+        {
+            AllMaps.Remove(map);
+            File.WriteAllLines(@"UserMaps.txt",
+                File.ReadLines(@"UserMaps.txt").Where(l => MapConstructorSerializer.DeserializeMap(l).Name != map.Name)
+                    .ToList());
+        }
+
         #endregion
     }
 }

@@ -10,7 +10,6 @@ namespace TimeCollapse.View
     public sealed class MapConstructorCanvas : UserControl
     {
         private readonly MapConstructor mapConstructor;
-        private readonly List<(Rectangle, Rectangle)> stages = new();
         private bool draw;
         private Rectangle drawableRectangle;
         private Point drawStartPoint;
@@ -28,8 +27,8 @@ namespace TimeCollapse.View
             UpdateStyles();
         }
 
-        public HashSet<Rectangle> Blocks { get; } = new();
-        public HashSet<Rectangle> TimeAnomalies { get; } = new();
+        public HashSet<Rectangle> Blocks { get; set; } = new();
+        public HashSet<Rectangle> TimeAnomalies { get; set; } = new();
 
         private ConstructorDetail ActiveDetail =>
             mapConstructor.Details.SelectedItem.ToString() switch
