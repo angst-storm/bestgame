@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Drawing;
+using NUnit.Framework;
 
 namespace TimeCollapse.Models.Tests
 {
@@ -34,6 +36,47 @@ namespace TimeCollapse.Models.Tests
             var crossResult = FieldOfViewCalculator.RayCross(rayLocation, rayVector, section, out var result);
             Assert.AreEqual(cross, crossResult);
             Assert.AreEqual(new Vector(rx, ry), result);
+        }
+
+        [TestCase(2, 2, false)]
+        [TestCase(2, 6, false)]
+        [TestCase(3, 4, true)]
+        [TestCase(5, 0, false)]
+        [TestCase(5, 8, false)]
+        [TestCase(6, 4, true)]
+        [TestCase(7, 3, true)]
+        [TestCase(7, 5, true)]
+        [TestCase(9, 1, true)]
+        [TestCase(9, 4, true)]
+        [TestCase(9, 7, true)]
+        [TestCase(10, 2, true)]
+        [TestCase(8, 8, false)]
+        [TestCase(10, 9, false)]
+        public void SectorContainsTest(int x, int y, bool contains)
+        {
+            Assert.IsTrue(contains == FieldOfViewCalculator.SectorContains(
+                new Vector(x, y), new Rectangle(1, 1, 7, 6), true));
+        }
+
+        [TestCase(5, 3, true, true)]
+        [TestCase(7, 2, true, true)]
+        [TestCase(8, 9, true, true)]
+        [TestCase(9, 5, true, false)]
+        [TestCase(10, 3, true, false)]
+        [TestCase(10, 6, true, false)]
+        [TestCase(5, 3, false, true)]
+        [TestCase(4, 8, false, true)]
+        [TestCase(3, 1, false, true)]
+        [TestCase(1, 10, false, true)]
+        [TestCase(2, 5, false, false)]
+        [TestCase(1, 5, false, false)]
+        [TestCase(1, 7, false, false)]
+        [TestCase(2, 2, false, true)]
+        public void DontCrossTest(int x, int y, bool right, bool dontCross)
+        {
+            Assert.IsTrue(dontCross == FieldOfViewCalculator.DontCross(new Vector(x, y),
+                new Rectangle(right ? 5 : 0, 1, 6, 8), right,
+                new[] {new Rectangle(2, 3, 1, 4), new Rectangle(7, 3, 1, 4)}));
         }
     }
 }
