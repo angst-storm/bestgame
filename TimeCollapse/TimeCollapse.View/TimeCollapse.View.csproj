@@ -75,6 +75,10 @@
       <Content Include="UserMaps.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <None Remove="Audio\Ambient.wav" />
+      <Content Include="Audio\Ambient.wav">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

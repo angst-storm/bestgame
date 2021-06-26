@@ -146,7 +146,7 @@ namespace TimeCollapse.View
             }
 
             var expRect = game.PresentExplorer.Collider;
-            g.DrawImage(indicatorEnumerator.Current ?? throw new Exception("не работаит"),
+            g.DrawImage(indicatorEnumerator.Current ?? throw new Exception("Animation dont work"),
                 new Rectangle(expRect.X, expRect.Y - expRect.Height / 2, expRect.Width, expRect.Height / 2));
         }
 

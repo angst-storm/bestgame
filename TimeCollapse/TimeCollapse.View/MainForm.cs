@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Media;
 using System.Windows.Forms;
 using TimeCollapse.Models;
 
@@ -31,6 +32,8 @@ namespace TimeCollapse.View
 
             Controls.AddRange(new Control[] {menu, game, constructor});
             ResumeLayout(false);
+            
+            new SoundPlayer(@"Audio\Ambient.wav").Play();
         }
 
         public void ToMainMenu(UserControl from)
