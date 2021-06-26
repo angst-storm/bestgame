@@ -117,7 +117,8 @@ namespace TimeCollapse.View
                 case ConstructorDetail.StartRectangle:
                     mapConstructor.PrintException(
                         $"Стартовый прямоугольник должен быть размера {Explorer.DefaultColliderSize.Width}x{Explorer.DefaultColliderSize.Height}");
-                    drawableRectangle = Rectangle.Empty;
+                    ActiveStage.Spawn = new Rectangle(drawableRectangle.Location, Explorer.DefaultColliderSize);
+                    drawableRectangle = ActiveStage.Spawn;
                     break;
                 case ConstructorDetail.TargetRectangle:
                     ActiveStage.Target = drawableRectangle;
