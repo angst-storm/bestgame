@@ -33,7 +33,7 @@ namespace TimeCollapse.View
             Controls.AddRange(new Control[] {menu, game, constructor});
             ResumeLayout(false);
             
-            new SoundPlayer(@"Audio\Ambient.wav").Play();
+            new SoundPlayer(@"Audio\Ambient.wav").PlayLooping();
         }
 
         public void ToMainMenu(UserControl from)

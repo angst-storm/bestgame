@@ -491,9 +491,10 @@ namespace TimeCollapse.Models
             new Rectangle(1440, 880, 16, 16),
             new Rectangle(1424, 896, 16, 16),
             new Rectangle(1408, 912, 16, 16),
-            new Rectangle(1120, 544, 96, 16),
-            new Rectangle(1216, 560, 32, 16),
-            new Rectangle(1248, 576, 32, 16),
+            new Rectangle(1120, 528, 96, 16),
+            new Rectangle(1216, 544, 32, 16),
+            new Rectangle(1248, 560, 32, 16),
+            new Rectangle(1280, 576, 32, 16),
         }, new[]
         {
             new Rectangle(432, 944, 192, 16),
