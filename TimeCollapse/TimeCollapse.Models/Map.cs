@@ -403,8 +403,8 @@ namespace TimeCollapse.Models
         private static readonly Map CrossMap = new("Эндшпиль", new[]
         {
             new Rectangle(624, 928, 1264, 16),
-            new Rectangle(16, 832, 16, 96),
-            new Rectangle(1872, 832, 16, 96),
+            new Rectangle(16, 816, 16, 112),
+            new Rectangle(1872, 816, 16, 112),
             new Rectangle(160, 912, 16, 16),
             new Rectangle(176, 896, 16, 16),
             new Rectangle(192, 880, 16, 16),
@@ -520,7 +520,7 @@ namespace TimeCollapse.Models
             new Rectangle(48, 256, 640, 16),
         }, new[]
         {
-            new Stage(new Point(48, 864), new Rectangle(32, 592, 48, 48)),
+            new Stage(new Point(48, 864), new Rectangle(48, 592, 48, 48)),
             new Stage(new Point(1824, 864), new Rectangle(1808, 592, 48, 48)),
             new Stage(new Point(48, 592), new Rectangle(1376, 352, 48, 48)),
             new Stage(new Point(1824, 592), new Rectangle(528, 352, 48, 48)),
