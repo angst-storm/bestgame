@@ -4,6 +4,7 @@
         <OutputType>WinExe</OutputType>
         <TargetFramework>net5.0-windows</TargetFramework>
         <UseWindowsForms>true</UseWindowsForms>
+        <ApplicationIcon>Assets/Logo.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -79,6 +80,7 @@
       <Content Include="Audio\Ambient.wav">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <None Remove="Assets\Логотип игры без фона.png" />
     </ItemGroup>
 
 </Project>
