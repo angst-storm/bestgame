@@ -51,6 +51,11 @@ namespace TimeCollapse.Models
             ActualStage = stagesSwitcher.Current;
         }
 
+        public static bool OnMap(Point point)
+        {
+            return point.X is >= -240 and <= 1920 + 240 && point.Y is >= -240 and <= 1080 + 240;
+        }
+
         #region StaticMembers
 
         private static readonly Map Acquaintance = new("Знакомство", new[]

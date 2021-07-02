@@ -27,6 +27,7 @@ namespace TimeCollapse.Models
         {
             foreach (var explorer in AllExplorers)
                 explorer.Move(tick - tickDiff);
+            if (!Map.OnMap(PresentExplorer.Location)) ResetStage();
             PortalControl(tick);
             TimeAnomalyControl();
             FieldOfViewIntersectControl();
@@ -66,7 +67,7 @@ namespace TimeCollapse.Models
                 new[]
                 {
                     new Vector(c.X, c.Y),
-                    //new Vector(c.X + c.Width, c.Y),
+                    new Vector(c.X + c.Width, c.Y),
                     new Vector(c.X, c.Y + c.Height),
                     new Vector(c.X + c.Width, c.Y + c.Height)
                 }.Any(p => e.FieldOfViewContains(this, p)))) return;
