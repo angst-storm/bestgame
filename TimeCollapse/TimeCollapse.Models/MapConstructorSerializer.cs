@@ -104,7 +104,7 @@ namespace TimeCollapse.Models
 
         /// <summary>
         ///     Метод,преобразующий два числа в Объект класса Stage, параметры полей Spawn и Target которого выражены целыми
-        ///     числами,кратными 16, в диапазоне от 0 до 1920
+        ///     числами, кратными 16, в диапазоне от 0 до 1920
         /// </summary>
         /// <param name="code1">Первое целое число, созданное методом MapConstructorSerializer.SerializeStage</param>
         /// <param name="code2">Второе целое число, созданное методом MapConstructorSerializer.SerializeStage</param>
