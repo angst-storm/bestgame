@@ -2,14 +2,6 @@
 
 ---
 
-<p align="center">
-
-<img src="https://img.shields.io/badge/made%20by-angstorm-blue.svg" alt="made by">
-
-<img src="https://img.shields.io/badge/net-5.0-green.svg" alt="net 5">
-
-</p>
-
 <img src="./readme_assets/h2.png" alt="preview" width="100%">
 
 ---
@@ -51,19 +43,13 @@ _Разработка проекта не окончена и в данный м
 ### Игра
 
 <a href="https://youtu.be/5D15zuV9Ppk">
-    <figure>
-        <img src="./readme_assets/game.gif" alt="game">
-        <figcaption>https://youtu.be/5D15zuV9Ppk</figcaption>
-    </figure>
+    <img src="./readme_assets/game.gif" alt="game">
 </a>
 
 ### Конструктор
 
 <a href="https://youtu.be/5D15zuV9Ppk?t=60">
-    <figure>
-        <img src="./readme_assets/constructor.gif" alt="constructor">
-        <figcaption>https://youtu.be/5D15zuV9Ppk?t=60</figcaption>
-    </figure>
+  <img src="./readme_assets/constructor.gif" alt="constructor">
 </a>
 
 ## О проекте
