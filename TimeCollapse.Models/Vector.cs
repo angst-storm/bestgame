@@ -39,7 +39,7 @@ namespace TimeCollapse.Models
 
         public Point ToPoint()
         {
-            return new((int) Math.Ceiling(X), (int) Math.Ceiling(Y));
+            return new((int)Math.Ceiling(X), (int)Math.Ceiling(Y));
         }
 
         public override string ToString()
@@ -56,7 +56,7 @@ namespace TimeCollapse.Models
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((Vector) obj);
+            return obj.GetType() == GetType() && Equals((Vector)obj);
         }
 
         public override int GetHashCode()

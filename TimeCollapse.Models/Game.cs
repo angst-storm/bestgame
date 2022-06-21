@@ -21,7 +21,7 @@ namespace TimeCollapse.Models
         public bool GameOver { get; private set; }
 
         public IEnumerable<Explorer> AllExplorers =>
-            explorersFromPast.Except(removedExplorers).Concat(new[] {PresentExplorer});
+            explorersFromPast.Except(removedExplorers).Concat(new[] { PresentExplorer });
 
         public void Update(int tick)
         {

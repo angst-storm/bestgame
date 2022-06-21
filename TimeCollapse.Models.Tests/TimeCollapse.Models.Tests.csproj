@@ -16,4 +16,11 @@
       <ProjectReference Include="..\TimeCollapse.Models\TimeCollapse.Models.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="UserMaps.txt" />
+      <Content Include="UserMaps.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

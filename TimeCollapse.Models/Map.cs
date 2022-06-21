@@ -532,7 +532,7 @@ namespace TimeCollapse.Models
         public static readonly BindingList<Map> AllMaps = new();
 
         public static Map[] Plot { get; } =
-            {Acquaintance, SafeChallenge, Clones1, Clones2, Evolution, BigMap, CrossMap};
+            { Acquaintance, SafeChallenge, Clones1, Clones2, Evolution, BigMap, CrossMap };
 
         static Map()
         {

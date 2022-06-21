@@ -28,7 +28,7 @@ namespace TimeCollapse.Models
             var currentVector = new Vector(e.TurnedRight ? viewRect.Right : viewRect.Left, viewRect.Top) - start;
             var dAngle = (e.TurnedRight ? -1 : 1) * ViewAngleHalfRad * 2 / NumberOfRays;
 
-            var result = new List<Point> {start.ToPoint()};
+            var result = new List<Point> { start.ToPoint() };
             for (var i = 0; i < NumberOfRays; i++)
             {
                 var shortestCrossedRay = start + currentVector;
@@ -46,7 +46,7 @@ namespace TimeCollapse.Models
 
         private static Rectangle GetViewRectangle(Explorer e)
         {
-            var heightHalf = (int) (Math.Tan(ViewAngleHalfRad) * ViewingRange);
+            var heightHalf = (int)(Math.Tan(ViewAngleHalfRad) * ViewingRange);
             return new Rectangle(
                 e.Location.X - (e.TurnedRight ? -e.Collider.Size.Width : ViewingRange),
                 e.Location.Y - heightHalf + e.Collider.Size.Height / 4,
