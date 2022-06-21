@@ -42,15 +42,15 @@ _Разработка проекта не окончена и в данный м
 
 ### Игра
 
-<a href="https://youtu.be/5D15zuV9Ppk">
-    <img src="./readme_assets/game.gif" alt="game">
-</a>
+<img src="./readme_assets/game.gif" alt="game">
+
+https://youtu.be/5D15zuV9Ppk
 
 ### Конструктор
 
-<a href="https://youtu.be/5D15zuV9Ppk?t=60">
-  <img src="./readme_assets/constructor.gif" alt="constructor">
-</a>
+<img src="./readme_assets/constructor.gif" alt="constructor">
+
+https://youtu.be/5D15zuV9Ppk?t=60
 
 ## О проекте
 
@@ -65,19 +65,6 @@ _Разработка проекта не окончена и в данный м
 
 Для разнообразия уровней возможны различные дополнительные условия на них, например, туман
 (сужает обзор игрока и копий, что дает преимущества и недостатки при игре).
-
-<table>
-    <tr>
-        <td><img src="./readme_assets/character.gif" alt="character"></td>
-        <td><img src="./readme_assets/anomaly.gif" alt="anomaly"></td>
-        <td><img src="./readme_assets/portal.gif" alt="portal"></td>
-    </tr>
-    <tr>
-        <td>Персонаж</td>
-        <td>Аномалия</td>
-        <td>Портал</td>
-    </tr>
-</table>
 
 Структура проекта:
 
